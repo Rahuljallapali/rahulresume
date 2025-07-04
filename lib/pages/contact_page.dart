@@ -9,6 +9,9 @@ import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 import '../widgets/back_button.dart';
 import '../utils/download_helper.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
+import '../widgets/page_nav_bar.dart';
 
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
@@ -50,28 +53,32 @@ class _ContactPageState extends State<ContactPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           SingleChildScrollView(
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(isDarkMode),
                 Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildPurposeSection(),
+                      _buildPurposeSection(theme, isDarkMode),
                       const SizedBox(height: 48),
-                      _buildContactOptions(),
+                      _buildContactOptions(theme, isDarkMode),
                       const SizedBox(height: 48),
-                      _buildSocialLinks(),
+                      _buildSocialLinks(theme, isDarkMode),
                       const SizedBox(height: 48),
-                      _buildLocationAvailability(),
+                      _buildLocationAvailability(theme, isDarkMode),
                       const SizedBox(height: 48),
-                      _buildContactForm(),
+                      _buildContactForm(theme, isDarkMode),
                     ],
                   ),
                 ),
@@ -79,6 +86,7 @@ class _ContactPageState extends State<ContactPage> {
             ),
           ),
           const CustomBackButton(),
+          const PageNavBar(currentPage: 'Contact'),
           Align(
             alignment: Alignment.topCenter,
             child: ConfettiWidget(
@@ -104,18 +112,20 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDarkMode) {
     return Container(
       width: double.infinity,
       height: 200,
       decoration: BoxDecoration(
         color: Colors.black,
         image: DecorationImage(
-          image: const AssetImage('assets/homescreen.png'),
+          image: AssetImage(
+            isDarkMode ? 'assets/homescreen.png' : 'assets/lightMode_homescreen.png'
+          ),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.7),
-            BlendMode.darken,
+            isDarkMode ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.2),
+            isDarkMode ? BlendMode.darken : BlendMode.lighten,
           ),
         ),
       ),
@@ -125,56 +135,47 @@ class _ContactPageState extends State<ContactPage> {
           style: GoogleFonts.inter(
             fontSize: 48,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildPurposeSection() {
+  Widget _buildPurposeSection(ThemeData theme, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: isDarkMode ? Colors.black12 : Colors.grey[100],
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[850]!, width: 1),
+        border: Border.all(
+          color: isDarkMode ? Colors.grey[850]! : Colors.grey[300]!,
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
           Text(
             "I'm actively seeking Flutter development roles",
-            style: GoogleFonts.inter(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            style: theme.textTheme.headlineMedium,
           ),
           const SizedBox(height: 16),
           Text(
             "Feel free to reach out for job opportunities, collaborations, or freelance work.",
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: Colors.grey[300],
-              height: 1.5,
-            ),
+            style: theme.textTheme.bodyLarge,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildContactOptions() {
+  Widget _buildContactOptions(ThemeData theme, bool isDarkMode) {
     return Column(
       children: [
         Text(
           'Primary Contact Options',
-          style: GoogleFonts.inter(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: theme.textTheme.headlineSmall,
         ),
         const SizedBox(height: 32),
         Wrap(
@@ -187,12 +188,16 @@ class _ContactPageState extends State<ContactPage> {
               title: 'Email',
               content: 'rahul.jallapalli.dev@gmail.com',
               onTap: () => _launchURL('mailto:rahul.jallapalli.dev@gmail.com'),
+              theme: theme,
+              isDarkMode: isDarkMode,
             ),
             _buildContactCard(
               icon: Icons.phone,
               title: 'Phone',
               content: '+91-98765-43210',
               onTap: () => _launchURL('tel:+919876543210'),
+              theme: theme,
+              isDarkMode: isDarkMode,
             ),
             _buildContactCard(
               icon: Icons.description,
@@ -202,6 +207,8 @@ class _ContactPageState extends State<ContactPage> {
                 'assets/resume.pdf',
                 'Rahul_Jallapalli_Resume.pdf',
               ),
+              theme: theme,
+              isDarkMode: isDarkMode,
               isButton: true,
             ),
           ],
@@ -215,6 +222,8 @@ class _ContactPageState extends State<ContactPage> {
     required String title,
     required String content,
     required VoidCallback onTap,
+    required ThemeData theme,
+    required bool isDarkMode,
     bool isButton = false,
   }) {
     return Container(
@@ -224,14 +233,17 @@ class _ContactPageState extends State<ContactPage> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
+          colors: isDarkMode ? [
             Colors.grey[900]!,
             Colors.grey[850]!,
+          ] : [
+            Colors.white,
+            Colors.grey[50]!,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF0066FF).withOpacity(0.3),
+          color: theme.colorScheme.primary.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -242,23 +254,19 @@ class _ContactPageState extends State<ContactPage> {
             Icon(
               icon,
               size: 32,
-              color: const Color(0xFF0066FF),
+              color: theme.colorScheme.primary,
             ),
             const SizedBox(height: 16),
             Text(
               title,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             if (isButton)
               ElevatedButton(
                 onPressed: onTap,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0066FF),
+                  backgroundColor: theme.colorScheme.primary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,
@@ -272,7 +280,7 @@ class _ContactPageState extends State<ContactPage> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    color: theme.colorScheme.onPrimary,
                   ),
                 ),
               )
@@ -281,7 +289,7 @@ class _ContactPageState extends State<ContactPage> {
                 content,
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: const Color(0xFF0066FF),
+                  color: theme.colorScheme.primary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -291,16 +299,12 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  Widget _buildSocialLinks() {
+  Widget _buildSocialLinks(ThemeData theme, bool isDarkMode) {
     return Column(
       children: [
         Text(
           'Professional Social Links',
-          style: GoogleFonts.inter(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: theme.textTheme.headlineSmall,
         ),
         const SizedBox(height: 32),
         Wrap(
@@ -312,21 +316,29 @@ class _ContactPageState extends State<ContactPage> {
               icon: FontAwesomeIcons.linkedin,
               label: 'LinkedIn',
               url: 'https://linkedin.com/in/rahul-jallapalli',
+              theme: theme,
+              isDarkMode: isDarkMode,
             ),
             _buildSocialButton(
               icon: FontAwesomeIcons.github,
               label: 'GitHub',
               url: 'https://github.com/rahul-jallapalli',
+              theme: theme,
+              isDarkMode: isDarkMode,
             ),
             _buildSocialButton(
               icon: FontAwesomeIcons.globe,
               label: 'Portfolio',
               url: '#portfolio',
+              theme: theme,
+              isDarkMode: isDarkMode,
             ),
             _buildSocialButton(
               icon: FontAwesomeIcons.stackOverflow,
               label: 'Stack Overflow',
               url: 'https://stackoverflow.com/users/rahul-jallapalli',
+              theme: theme,
+              isDarkMode: isDarkMode,
             ),
           ],
         ),
@@ -338,6 +350,8 @@ class _ContactPageState extends State<ContactPage> {
     required IconData icon,
     required String label,
     required String url,
+    required ThemeData theme,
+    required bool isDarkMode,
   }) {
     return Tooltip(
       message: label,
@@ -346,10 +360,10 @@ class _ContactPageState extends State<ContactPage> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.black12,
+            color: isDarkMode ? Colors.black12 : Colors.grey[100],
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: const Color(0xFF0066FF).withOpacity(0.3),
+              color: theme.colorScheme.primary.withOpacity(0.3),
               width: 1,
             ),
           ),
@@ -358,16 +372,13 @@ class _ContactPageState extends State<ContactPage> {
             children: [
               FaIcon(
                 icon,
-                color: const Color(0xFF0066FF),
+                color: theme.colorScheme.primary,
                 size: 24,
               ),
               const SizedBox(width: 12),
               Text(
                 label,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
+                style: theme.textTheme.bodyLarge,
               ),
             ],
           ),
@@ -376,13 +387,16 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  Widget _buildLocationAvailability() {
+  Widget _buildLocationAvailability(ThemeData theme, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: isDarkMode ? Colors.black12 : Colors.grey[100],
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[850]!, width: 1),
+        border: Border.all(
+          color: isDarkMode ? Colors.grey[850]! : Colors.grey[300]!,
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
@@ -397,10 +411,7 @@ class _ContactPageState extends State<ContactPage> {
               const SizedBox(width: 8),
               Text(
                 'Hyderabad, India',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
+                style: theme.textTheme.bodyLarge,
               ),
             ],
           ),
@@ -419,10 +430,7 @@ class _ContactPageState extends State<ContactPage> {
               const SizedBox(width: 8),
               Text(
                 'Open to On-site, Hybrid, or Remote roles',
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: Colors.grey[300],
-                ),
+                style: theme.textTheme.bodyLarge,
               ),
             ],
           ),
@@ -431,13 +439,16 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  Widget _buildContactForm() {
+  Widget _buildContactForm(ThemeData theme, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: isDarkMode ? Colors.black12 : Colors.grey[100],
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[850]!, width: 1),
+        border: Border.all(
+          color: isDarkMode ? Colors.grey[850]! : Colors.grey[300]!,
+          width: 1,
+        ),
       ),
       child: Form(
         key: _formKey,
@@ -446,21 +457,21 @@ class _ContactPageState extends State<ContactPage> {
           children: [
             Text(
               'Send me a message',
-              style: GoogleFonts.inter(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: theme.textTheme.headlineSmall,
             ),
             const SizedBox(height: 24),
             _buildTextField(
               label: 'Name',
+              theme: theme,
+              isDarkMode: isDarkMode,
               validator: (value) =>
                   value?.isEmpty ?? true ? 'Please enter your name' : null,
             ),
             const SizedBox(height: 16),
             _buildTextField(
               label: 'Email',
+              theme: theme,
+              isDarkMode: isDarkMode,
               validator: (value) {
                 if (value?.isEmpty ?? true) {
                   return 'Please enter your email';
@@ -475,6 +486,8 @@ class _ContactPageState extends State<ContactPage> {
             const SizedBox(height: 16),
             _buildTextField(
               label: 'Message',
+              theme: theme,
+              isDarkMode: isDarkMode,
               maxLines: 5,
               validator: (value) =>
                   value?.isEmpty ?? true ? 'Please enter your message' : null,
@@ -493,10 +506,7 @@ class _ContactPageState extends State<ContactPage> {
                         const SizedBox(width: 8),
                         Text(
                           'Message sent successfully!',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            color: Colors.green,
-                          ),
+                          style: theme.textTheme.bodyLarge,
                         ),
                       ],
                     )
@@ -507,22 +517,33 @@ class _ContactPageState extends State<ContactPage> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0066FF),
+                        backgroundColor: theme.colorScheme.primary,
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
+                          horizontal: 48,
                           vertical: 16,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text(
-                        'Send Message',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.send,
+                            color: theme.colorScheme.onPrimary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Send Message',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
             ),
@@ -534,38 +555,44 @@ class _ContactPageState extends State<ContactPage> {
 
   Widget _buildTextField({
     required String label,
+    required ThemeData theme,
+    required bool isDarkMode,
     int maxLines = 1,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       maxLines: maxLines,
       validator: validator,
-      style: GoogleFonts.inter(color: Colors.white),
+      style: theme.textTheme.bodyLarge,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.inter(color: Colors.grey[400]),
+        labelStyle: theme.textTheme.bodyMedium,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[700]!),
+          borderSide: BorderSide(
+            color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[700]!),
+          borderSide: BorderSide(
+            color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF0066FF)),
+          borderSide: BorderSide(color: theme.colorScheme.primary),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide: BorderSide(color: theme.colorScheme.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide: BorderSide(color: theme.colorScheme.error),
         ),
         filled: true,
-        fillColor: Colors.black12,
+        fillColor: isDarkMode ? Colors.black12 : Colors.white,
       ),
     );
   }

@@ -1,165 +1,75 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../widgets/back_button.dart';
-import '../utils/download_helper.dart';
+import '../widgets/page_nav_bar.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../services/pdf_service.dart';
 
 class ResumePage extends StatelessWidget {
   const ResumePage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(32, 100, 32, 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Rahul',
-                            style: GoogleFonts.inter(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            'Jallapalli',
-                            style: GoogleFonts.inter(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0066FF),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Flutter Developer',
-                            style: GoogleFonts.inter(
-                              fontSize: 24,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      color: Colors.grey[300],
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  _buildContactInfo(),
-                  const SizedBox(height: 48),
-                  // Work Experience Section
-                  _buildSection(
-                    'Work Experience',
-                    [
-                      _buildExperienceItem(
-                        'Flutter Developer',
-                        'Company Name',
-                        '2021 - Present',
-                        'Developed and maintained multiple Flutter applications with clean architecture and state management using GetX.',
-                      ),
-                      _buildExperienceItem(
-                        'Mobile Developer',
-                        'Previous Company',
-                        '2019 - 2021',
-                        'Worked on cross-platform mobile applications using Flutter and React Native.',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  // Education Section
-                  _buildSection(
-                    'Education',
-                    [
-                      _buildEducationItem(
-                        'Bachelor of Technology',
-                        'University Name',
-                        '2015 - 2019',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  // Skills Section
-                  _buildSkillsSection(),
-                ],
-              ),
-            ),
+  Widget _buildHeader(bool isDarkMode) {
+    return Container(
+      width: double.infinity,
+      height: 200,
+      decoration: BoxDecoration(
+        color: Colors.black,
+        image: DecorationImage(
+          image: AssetImage(
+            isDarkMode ? 'assets/homescreen.png' : 'assets/lightMode_homescreen.png'
           ),
-          const CustomBackButton(),
-        ],
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            isDarkMode ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.2),
+            isDarkMode ? BlendMode.darken : BlendMode.lighten,
+          ),
+        ),
+      ),
+      child: Center(
+        child: Text(
+          'Resume',
+          style: GoogleFonts.inter(
+            fontSize: 48,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildContactInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildContactInfo(ThemeData theme) {
+    return Row(
       children: [
+        Icon(Icons.email, color: theme.colorScheme.primary),
+        const SizedBox(width: 8),
         Text(
-          'Contact',
-          style: GoogleFonts.inter(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          'rahul.jallapalli@example.com',
+          style: theme.textTheme.bodyLarge,
         ),
-        const SizedBox(height: 16),
-        _buildContactItem(Icons.phone, '123-456-7890'),
-        _buildContactItem(Icons.email, 'rahul@example.com'),
-        _buildContactItem(Icons.location_on, 'City, Country'),
+        const SizedBox(width: 24),
+        Icon(Icons.phone, color: theme.colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          '+1 234 567 8900',
+          style: theme.textTheme.bodyLarge,
+        ),
       ],
     );
   }
 
-  Widget _buildContactItem(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF0066FF), size: 20),
-          const SizedBox(width: 12),
-          Text(
-            text,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: Colors.grey[300],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSection(String title, List<Widget> items) {
+  Widget _buildSection(String title, List<Widget> items, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: GoogleFonts.inter(
-            fontSize: 24,
+          style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         ...items,
       ],
     );
@@ -168,20 +78,19 @@ class ResumePage extends StatelessWidget {
   Widget _buildExperienceItem(
     String title,
     String company,
-    String period,
+    String duration,
     String description,
+    ThemeData theme,
   ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
@@ -189,17 +98,13 @@ class ResumePage extends StatelessWidget {
             children: [
               Text(
                 company,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: const Color(0xFF0066FF),
-                ),
+                style: theme.textTheme.titleMedium,
               ),
               const SizedBox(width: 16),
               Text(
-                period,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: Colors.grey[400],
+                duration,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ],
@@ -207,9 +112,7 @@ class ResumePage extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             description,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: Colors.grey[300],
+            style: theme.textTheme.bodyLarge?.copyWith(
               height: 1.5,
             ),
           ),
@@ -220,38 +123,33 @@ class ResumePage extends StatelessWidget {
 
   Widget _buildEducationItem(
     String degree,
-    String university,
-    String period,
+    String institution,
+    String duration,
+    ThemeData theme,
   ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             degree,
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
           Row(
             children: [
               Text(
-                university,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: const Color(0xFF0066FF),
-                ),
+                institution,
+                style: theme.textTheme.titleMedium,
               ),
               const SizedBox(width: 16),
               Text(
-                period,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: Colors.grey[400],
+                duration,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ],
@@ -261,65 +159,147 @@ class ResumePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSkillsSection() {
+  Widget _buildSkillsSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Skills',
-          style: GoogleFonts.inter(
-            fontSize: 24,
+          style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
           ),
         ),
-        const SizedBox(height: 16),
-        _buildSkillBar('Flutter', 0.9),
-        _buildSkillBar('Dart', 0.85),
-        _buildSkillBar('Firebase', 0.8),
-        _buildSkillBar('GetX', 0.85),
-        _buildSkillBar('REST APIs', 0.8),
-        _buildSkillBar('Git', 0.75),
+        const SizedBox(height: 24),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildSkillChip('Flutter', theme),
+            _buildSkillChip('Dart', theme),
+            _buildSkillChip('Firebase', theme),
+            _buildSkillChip('REST APIs', theme),
+            _buildSkillChip('Git', theme),
+            _buildSkillChip('UI/UX Design', theme),
+            _buildSkillChip('State Management', theme),
+            _buildSkillChip('Clean Architecture', theme),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildSkillBar(String skill, double progress) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildSkillChip(String label, ThemeData theme) {
+    return Chip(
+      label: Text(label),
+      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+      labelStyle: TextStyle(color: theme.colorScheme.primary),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Stack(
         children: [
-          Text(
-            skill,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: Colors.white,
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildHeader(isDarkMode),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 48.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Rahul',
+                                style: theme.textTheme.displayMedium,
+                              ),
+                              Text(
+                                'Jallapalli',
+                                style: theme.textTheme.displayMedium?.copyWith(
+                                  color: theme.colorScheme.primary.withOpacity(0.5),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Flutter Developer',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Experienced Flutter developer with a passion for creating beautiful and functional mobile applications. Skilled in developing cross-platform applications with clean architecture and modern state management solutions.',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      _buildContactInfo(theme),
+                      const SizedBox(height: 48),
+                      // Work Experience Section
+                      _buildSection(
+                        'Work Experience',
+                        [
+                          _buildExperienceItem(
+                            'Senior Flutter Developer',
+                            'Tech Solutions Inc.',
+                            '2021 - Present',
+                            'Led the development of multiple Flutter applications with clean architecture and state management using GetX. Mentored junior developers and implemented best practices.',
+                            theme,
+                          ),
+                          _buildExperienceItem(
+                            'Mobile Developer',
+                            'Mobile Innovations Ltd.',
+                            '2019 - 2021',
+                            'Developed cross-platform mobile applications using Flutter and React Native. Collaborated with design team to implement pixel-perfect UI/UX.',
+                            theme,
+                          ),
+                        ],
+                        theme,
+                      ),
+                      const SizedBox(height: 32),
+                      // Education Section
+                      _buildSection(
+                        'Education',
+                        [
+                          _buildEducationItem(
+                            'Bachelor of Technology in Computer Science',
+                            'University of Technology',
+                            '2015 - 2019',
+                            theme,
+                          ),
+                        ],
+                        theme,
+                      ),
+                      const SizedBox(height: 32),
+                      // Skills Section
+                      _buildSkillsSection(theme),
+                      const SizedBox(height: 48),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Stack(
-            children: [
-              Container(
-                height: 4,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey[800],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Container(
-                height: 4,
-                width: 300 * progress,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF0066FF), Color(0xFF2196F3)],
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
-          ),
+          const CustomBackButton(),
+          const PageNavBar(currentPage: 'Resume'),
         ],
       ),
     );

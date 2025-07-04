@@ -1,46 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:rahul_resume/routes/app_routes.dart';
+import '../providers/theme_provider.dart';
 
-class CustomBackButton extends StatelessWidget {
+class CustomBackButton extends StatefulWidget {
   const CustomBackButton({super.key});
+
+  @override
+  State<CustomBackButton> createState() => _CustomBackButtonState();
+}
+
+class _CustomBackButtonState extends State<CustomBackButton> {
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
       top: 32,
       left: 32,
-      child: InkWell(
-        onTap: () => Get.back(),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: const Color(0xFF0066FF).withOpacity(0.3),
-              width: 1,
-            ),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: IconButton(
+          tooltip: 'Go to Home',
+          icon: Icon(
+            Icons.home,
+            color: _isHovered ? Colors.amber : Colors.white,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.arrow_back_ios,
-                color: Color(0xFF0066FF),
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Back',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+          onPressed: () {
+            Get.toNamed(AppRoutes.homeScreen);
+          },
         ),
       ),
     );

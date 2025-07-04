@@ -1,101 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../widgets/back_button.dart';
-import 'dart:async';
+import '../widgets/page_nav_bar.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class PortfolioPage extends StatefulWidget {
+class PortfolioPage extends StatelessWidget {
   const PortfolioPage({super.key});
 
-  @override
-  State<PortfolioPage> createState() => _PortfolioPageState();
-}
-
-class _PortfolioPageState extends State<PortfolioPage> {
-  final PageController _pageController = PageController(
-    viewportFraction: 0.85, // This will show part of prev/next images
-    initialPage: 0,
-  );
-  int _currentPage = 0;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _startAutoSlide();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  void _startAutoSlide() {
-    _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
-      if (_pageController.hasClients) {
-        if (_currentPage < 2) {
-          _pageController.nextPage(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-        } else {
-          _pageController.animateToPage(
-            0,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-        }
-      }
-    });
-  }
-
-  void _stopAutoSlide() {
-    _timer?.cancel();
-    _timer = null;
-  }
-
-  void _restartAutoSlide() {
-    _stopAutoSlide();
-    _startAutoSlide();
+  void _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           SingleChildScrollView(
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(isDarkMode),
                 Padding(
-                  padding: const EdgeInsets.all(32.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 48.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        'Projects',
+                        style: theme.textTheme.displayLarge?.copyWith(
+                          fontSize: 64,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'A selection of my favorite projects, showcasing my skills and experience in Flutter development.',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontSize: 18,
+                          color: theme.colorScheme.onBackground.withOpacity(0.7),
+                        ),
+                      ),
+                      const SizedBox(height: 80),
+                      // Projects Grid
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.rocket_launch,
-                            color: Color(0xFF0066FF),
-                            size: 28,
+                          Expanded(
+                            child: _buildProjectCard(
+                              context,
+                              'Mobile App for Fitness Tracking',
+                              'A fitness tracking app built with Flutter, featuring real-time data synchronization, workout logging, and progress tracking.',
+                              'assets/serveizlogin.jpg',
+                              const Color(0xFF7DD3C0),
+                              theme,
+                            ),
                           ),
-                          const SizedBox(width: 16),
-                          Text(
-                            'My Projects',
-                            style: GoogleFonts.inter(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          const SizedBox(width: 32),
+                          Expanded(
+                            child: _buildProjectCard(
+                              context,
+                              'E-commerce App with Payment Integration',
+                              'An e-commerce application developed using Flutter, with secure payment processing and real-time inventory management.',
+                              'assets/serveizmenudrawer.jpg',
+                              const Color(0xFFFFB5A7),
+                              theme,
+                            ),
+                          ),
+                          const SizedBox(width: 32),
+                          Expanded(
+                            child: _buildProjectCard(
+                              context,
+                              'Social Media App with User Authentication',
+                              'A social media application developed in Flutter, with Firebase authentication and real-time data updates.',
+                              'assets/serveizMain.png',
+                              const Color(0xFFE5E5E5),
+                              theme,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 48),
-                      _buildProjectSection(),
+                      const SizedBox(height: 40),
+                      MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () => _launchURL('https://github.com/rahul-jallapalli'),
+                          child: Text(
+                            'For more projects, visit my GitHub profile.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              decoration: TextDecoration.underline,
+                              color: theme.colorScheme.onBackground.withOpacity(0.7),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -103,389 +109,113 @@ class _PortfolioPageState extends State<PortfolioPage> {
             ),
           ),
           const CustomBackButton(),
+          const PageNavBar(currentPage: 'Projects'),
         ],
       ),
     );
   }
 
-  Widget _buildProjectSection() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return _buildProjectCard(
-          width: constraints.maxWidth,
-          title: 'ServeizApp',
-          description:
-              'A robust field service management solution enabling technicians to manage work orders, track inventory, and communicate with customers — all in real-time and offline.',
-          role: 'Lead Flutter Developer',
-          features: [
-            'Real-time chat and video calls',
-            'Offline-first data sync',
-            'GPS tracking and route optimization',
-            'Camera integration for work documentation',
-            'Custom animations and transitions',
-          ],
-          techStack: [
-            'Flutter',
-            'GetX',
-            'WebSocket',
-            'SQLite',
-            'Google Maps',
-            'Firebase',
-          ],
-          images: [
-            'assets/serveizMain.png',
-            'assets/serveizlogin.jpg',
-            'assets/serveizmenudrawer.jpg',
-          ],
-          badges: ['Live on Play Store', 'Offline-First', 'Real-time Video'],
-          playStoreLink:
-              'https://play.google.com/store/apps/details?id=com.serveiz.app',
-        );
-      },
-    );
-  }
-
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDarkMode) {
     return Container(
       width: double.infinity,
       height: 200,
       decoration: BoxDecoration(
         color: Colors.black,
         image: DecorationImage(
-          image: const AssetImage('assets/homescreen.png'),
+          image: AssetImage(
+            isDarkMode ? 'assets/homescreen.png' : 'assets/lightMode_homescreen.png'
+          ),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.7),
-            BlendMode.darken,
+            isDarkMode ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.2),
+            isDarkMode ? BlendMode.darken : BlendMode.lighten,
           ),
         ),
       ),
       child: Center(
         child: Text(
-          'Portfolio',
+          'Projects',
           style: GoogleFonts.inter(
             fontSize: 48,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildProjectCard({
-    required double width,
-    required String title,
-    required String description,
-    required String role,
-    required List<String> features,
-    required List<String> techStack,
-    required List<String> images,
-    required List<String> badges,
-    String? playStoreLink,
-    String? githubLink,
-    String? liveDemoLink,
-  }) {
+  Widget _buildProjectCard(
+    BuildContext context,
+    String title,
+    String description,
+    String imagePath,
+    Color backgroundColor,
+    ThemeData theme,
+  ) {
     return Container(
-      width: width,
+      height: 400,
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
+        color: const Color(0xFF1B2028),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey[850]!,
-          width: 1,
-        ),
       ),
       child: Column(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left side - Project Images
-              Expanded(
-                flex: 3,
-                child: Container(
-                  height: 600,
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      bottomLeft: Radius.circular(16),
-                    ),
-                    color: Color(0xFF1A1A1A),
-                  ),
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          bottomLeft: Radius.circular(16),
-                        ),
-                        child: MouseRegion(
-                            onEnter: (_) => _stopAutoSlide(),
-                            onExit: (_) => _startAutoSlide(),
-                            child: AnimatedBuilder(
-                              animation: _pageController,
-                              builder: (context, child) {
-                                return PageView.builder(
-                                  controller: _pageController,
-                                  onPageChanged: (index) {
-                                    setState(() {
-                                      _currentPage = index;
-                                    });
-                                    _restartAutoSlide();
-                                  },
-                                  itemCount: images.length,
-                                  itemBuilder: (context, index) {
-                                    double currentPage = 0;
-                                    try {
-                                      currentPage = _pageController.page ??
-                                          _pageController.initialPage
-                                              .toDouble();
-                                    } catch (_) {}
-
-                                    double value = index - currentPage;
-                                    value = (value * 0.5).clamp(-1, 1);
-
-                                    return Transform.scale(
-                                      scale: 1,
-                                      child: Transform(
-                                        transform: Matrix4.identity()
-                                          ..setEntry(3, 2, 0.001)
-                                          ..translate(value * width * 0.5)
-                                          ..scale(1 - value.abs() * 0.2),
-                                        alignment: value >= 0
-                                            ? Alignment.centerLeft
-                                            : Alignment.centerRight,
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 24.0, vertical: 16.0),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black
-                                                      .withOpacity(0.2),
-                                                  blurRadius: 20,
-                                                  offset: const Offset(0, 10),
-                                                ),
-                                              ],
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              child: Image.asset(
-                                                images[index],
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            )),
-                      ),
-                      // Navigation arrows with improved styling
-                      Positioned.fill(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(left: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.3),
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconButton(
-                                icon: const Icon(Icons.arrow_back_ios,
-                                    color: Colors.white, size: 20),
-                                onPressed: () {
-                                  if (_currentPage > 0) {
-                                    _pageController.previousPage(
-                                      duration:
-                                          const Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                            Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.3),
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconButton(
-                                icon: const Icon(Icons.arrow_forward_ios,
-                                    color: Colors.white, size: 20),
-                                onPressed: () {
-                                  if (_currentPage < images.length - 1) {
-                                    _pageController.nextPage(
-                                      duration:
-                                          const Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Page indicators with improved styling
-                    ],
-                  ),
-                ),
-              ),
-              // Right side - Project Details
-              Expanded(
-                flex: 2,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF2A2A2A),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title and Links
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                title,
-                                style: GoogleFonts.inter(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            if (playStoreLink != null)
-                              IconButton(
-                                icon: const Icon(Icons.play_circle_outline),
-                                color: const Color(0xFF0066FF),
-                                onPressed: () => _launchURL(playStoreLink),
-                              ),
-                            if (githubLink != null)
-                              IconButton(
-                                icon: const Icon(Icons.code),
-                                color: const Color(0xFF0066FF),
-                                onPressed: () => _launchURL(githubLink),
-                              ),
-                            if (liveDemoLink != null)
-                              IconButton(
-                                icon: const Icon(Icons.launch),
-                                color: const Color(0xFF0066FF),
-                                onPressed: () => _launchURL(liveDemoLink),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // Badges
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: badgeMeta
-                              .map((b) => _buildBadge(b["text"].toString(),
-                                  color: b["color"] as Color?,
-                                  icon: b["icon"] as IconData?))
-                              .toList(),
-                        ),
-                        const SizedBox(height: 24),
-                        // Description
-                        Text(
-                          description,
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            color: Colors.grey[300],
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        // Role
-                        Text(
-                          'Role: $role',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF0066FF),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        // Key Features
-                        _buildSectionTitle('Key Features'),
-                        const SizedBox(height: 16),
-                        ...features
-                            .map((feature) => _buildFeatureItem(feature)),
-                        const SizedBox(height: 32),
-                        // Tech Stack
-                        _buildSectionTitle('Tech Stack'),
-                        const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: techStack
-                              .map((tech) => _buildTechChip(tech))
-                              .toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  final badgeMeta = [
-  {"text": "Live on Play Store", "color": Colors.green, "icon": Icons.play_arrow},
-  {"text": "Offline-First", "color": Colors.deepPurple, "icon": Icons.offline_bolt},
-  {"text": "Real-time Video", "color": Colors.redAccent, "icon": Icons.videocam},
-];
-
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.inter(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-    );
-  }
-
-  Widget _buildFeatureItem(String feature) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.check_circle_outline,
-            color: Color(0xFF0066FF),
-            size: 20,
-          ),
-          const SizedBox(width: 12),
+          // Project image
           Expanded(
-            child: Text(
-              feature,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: Colors.grey[300],
+            flex: 2,
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+              child: Center(
+                child: SizedBox(
+                  height: double.infinity,
+                  width: 280,
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.fitHeight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Content section
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: Text(
+                      description,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(0.7),
+                        height: 1.4,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -493,65 +223,4 @@ class _PortfolioPageState extends State<PortfolioPage> {
       ),
     );
   }
-
-  Widget _buildTechChip(String tech) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.black26,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF0066FF),
-          width: 1,
-        ),
-      ),
-      child: Text(
-        tech,
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBadge(String text, {Color? color, IconData? icon}) {
-  final baseColor = color ?? const Color(0xFF0066FF);
-
-  return MouseRegion(
-    cursor: SystemMouseCursors.click,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: baseColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: baseColor, width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null)
-            Icon(icon, size: 14, color: baseColor),
-          if (icon != null) const SizedBox(width: 6),
-          Text(
-            text,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: baseColor,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-
-  void _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    }
-  }
-}
+} 

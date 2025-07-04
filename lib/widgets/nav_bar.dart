@@ -1,56 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../routes/app_routes.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class NavBar extends StatelessWidget {
   const NavBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final theme = Theme.of(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.8),
+        color: theme.scaffoldBackgroundColor.withOpacity(0.8),
+        border: Border(
+          bottom: BorderSide(
+            color: theme.colorScheme.primary.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "Rahul's Portfolio",
-            style: GoogleFonts.inter(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            "Rahul Jallapalli | Software Developer",
+            style: theme.textTheme.headlineSmall,
           ),
           Row(
             children: [
-              _buildNavItem('Resume', AppRoutes.resume),
+              _buildNavItem(context, 'About', AppRoutes.aboutMe),
               const SizedBox(width: 32),
-              _buildNavItem('About Me', AppRoutes.aboutMe),
+              _buildNavItem(context, 'Projects', AppRoutes.portfolio),
               const SizedBox(width: 32),
-              _buildNavItem('Portfolio', AppRoutes.portfolio),
+              _buildNavItem(context, 'Blog', AppRoutes.blog),
               const SizedBox(width: 32),
-              _buildNavItem('Blog', AppRoutes.blog),
+              _buildNavItem(context, 'Resume', AppRoutes.resume),
               const SizedBox(width: 32),
-              _buildNavItem('Contact', AppRoutes.contact),
+              _buildNavItem(context, 'Contact', AppRoutes.contact),
             ],
+          ),
+          IconButton(
+            icon: Icon(
+              isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              color: theme.colorScheme.onBackground,
+            ),
+            onPressed: () {
+              final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+              themeProvider.toggleTheme();
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(String title, String route) {
+  Widget _buildNavItem(BuildContext context, String label, String route) {
+    final theme = Theme.of(context);
+    final isCurrentRoute = Get.currentRoute == route;
+    
     return InkWell(
       onTap: () => Get.toNamed(route),
-      child: Text(
-        title,
-        style: GoogleFonts.inter(
-          fontSize: 16,
-          color: Get.currentRoute == route ? const Color(0xFF0066FF) : Colors.white,
-          fontWeight: Get.currentRoute == route ? FontWeight.bold : FontWeight.normal,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Text(
+          label,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: isCurrentRoute 
+                ? theme.colorScheme.primary 
+                : theme.colorScheme.onBackground,
+            fontWeight: isCurrentRoute ? FontWeight.bold : FontWeight.normal,
+          ),
         ),
       ),
     );

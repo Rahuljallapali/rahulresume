@@ -53,8 +53,8 @@ class ProjectCard extends StatelessWidget {
                       child: Stack(
                         children: [
                           ProjectImageCarousel(
-                            imagePaths: imagePaths!,
-                            height: 400,
+                            images: imagePaths!,
+                            // height: 400, 
                             // width: double.infinity,
                           ),
                           // Phone frame overlay

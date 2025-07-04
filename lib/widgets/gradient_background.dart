@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class GradientBackground extends StatelessWidget {
   final Widget child;
@@ -10,7 +12,9 @@ class GradientBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final theme = Theme.of(context);
+    final isDarkMode = themeProvider.isDarkMode;
     
     return Container(
       decoration: BoxDecoration(
@@ -19,14 +23,14 @@ class GradientBackground extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: isDarkMode
               ? [
-                  const Color(0xFF0F172A),
-                  const Color(0xFF1E293B),
-                  const Color(0xFF1E293B).withOpacity(0.8),
+                  theme.scaffoldBackgroundColor,
+                  theme.scaffoldBackgroundColor.withOpacity(0.95),
+                  theme.scaffoldBackgroundColor.withOpacity(0.9),
                 ]
               : [
-                  const Color(0xFFF0F9FF),
-                  const Color(0xFFE0F2FE),
-                  const Color(0xFFBAE6FD),
+                  theme.scaffoldBackgroundColor,
+                  theme.scaffoldBackgroundColor.withOpacity(0.95),
+                  theme.scaffoldBackgroundColor.withOpacity(0.9),
                 ],
         ),
       ),
@@ -36,8 +40,8 @@ class GradientBackground extends StatelessWidget {
           CustomPaint(
             painter: DotPatternPainter(
               color: isDarkMode 
-                  ? Colors.white.withOpacity(0.03)
-                  : Colors.black.withOpacity(0.05),
+                  ? theme.colorScheme.onBackground.withOpacity(0.02)
+                  : theme.colorScheme.onBackground.withOpacity(0.03),
             ),
             child: Container(),
           ),

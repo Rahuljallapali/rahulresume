@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/back_button.dart';
+import '../widgets/page_nav_bar.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class AboutMePage extends StatelessWidget {
   const AboutMePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           SingleChildScrollView(
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(isDarkMode),
                 Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
@@ -24,17 +31,13 @@ class AboutMePage extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.star,
-                            color: const Color(0xFF0066FF),
+                            color: theme.colorScheme.primary,
                             size: 28,
                           ),
                           const SizedBox(width: 16),
                           Text(
                             'About Me',
-                            style: GoogleFonts.inter(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                            style: theme.textTheme.headlineLarge,
                           ),
                         ],
                       ),
@@ -42,69 +45,57 @@ class AboutMePage extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Left side - Content
                           Expanded(
                             flex: 3,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildParagraph(
-                                  'Hi, I\'m Rahul Jallapalli, a passionate Flutter Developer with over 3 years of experience building scalable, production-ready mobile apps. I specialize in creating cross-platform applications using Flutter with features like camera integration, Google Maps, real-time video collaboration, and offline-first data handling.',
+                                  'I am a passionate Flutter developer with a strong foundation in mobile app development. My journey in software development started with native Android development, and I transitioned to Flutter to create beautiful, cross-platform applications.',
+                                  theme,
                                 ),
                                 const SizedBox(height: 24),
                                 _buildParagraph(
-                                  'With a strong foundation in Spring Boot for backend systems and hands-on expertise in CI/CD pipelines using Jenkins, Docker, and AWS EC2, I bridge the gap between mobile frontends and scalable backend services.',
+                                  'I believe in writing clean, maintainable code and following best practices. My experience includes working with various state management solutions, integrating RESTful APIs, and implementing real-time features using WebSocket and Firebase.',
+                                  theme,
                                 ),
                                 const SizedBox(height: 24),
                                 _buildParagraph(
-                                  'What sets me apart is my experience working in field-service applications where performance, offline access, and real-time capabilities are crucial. I take pride in writing clean, maintainable code and delivering polished user experiences under tight deadlines.',
-                                ),
-                                const SizedBox(height: 24),
-                                _buildParagraph(
-                                  'Currently, I\'m focused on improving real-time features, integrating LLMs (AI), and collaborating on impactful Flutter projects. When I\'m not coding, I enjoy sketching UI ideas, exploring new tech trends, and hiking in nature.',
-                                ),
-                                const SizedBox(height: 32),
-                                Text(
-                                  'Let\'s build something awesome together!',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF0066FF),
-                                  ),
+                                  'When I\'m not coding, you can find me exploring new technologies, contributing to open-source projects, or enjoying nature through hiking and photography.',
+                                  theme,
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(width: 48),
-                          // Right side - Skills and Interests
                           Expanded(
                             flex: 2,
                             child: Container(
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
-                                color: Colors.black12,
+                                color: isDarkMode ? Colors.black12 : Colors.grey[100],
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: Colors.grey[850]!,
+                                  color: isDarkMode ? Colors.grey[850]! : Colors.grey[300]!,
                                   width: 1,
                                 ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _buildSectionTitle('Core Strengths'),
+                                  _buildSectionTitle('Core Strengths', theme),
                                   const SizedBox(height: 16),
-                                  _buildStrengthItem('Flutter & Dart', 'Cross-platform expertise'),
-                                  _buildStrengthItem('Backend Integration', 'Spring Boot & AWS'),
-                                  _buildStrengthItem('Real-time Features', 'WebSocket & Firebase'),
-                                  _buildStrengthItem('Clean Architecture', 'SOLID principles'),
+                                  _buildStrengthItem('Flutter & Dart', 'Cross-platform expertise', theme),
+                                  _buildStrengthItem('Backend Integration', 'Spring Boot & AWS', theme),
+                                  _buildStrengthItem('Real-time Features', 'WebSocket & Firebase', theme),
+                                  _buildStrengthItem('Clean Architecture', 'SOLID principles', theme),
                                   const SizedBox(height: 32),
-                                  _buildSectionTitle('Interests'),
+                                  _buildSectionTitle('Interests', theme),
                                   const SizedBox(height: 16),
-                                  _buildInterestItem('UI/UX Design'),
-                                  _buildInterestItem('Emerging Tech'),
-                                  _buildInterestItem('AI Integration'),
-                                  _buildInterestItem('Nature & Hiking'),
+                                  _buildInterestItem('UI/UX Design', theme),
+                                  _buildInterestItem('Emerging Tech', theme),
+                                  _buildInterestItem('AI Integration', theme),
+                                  _buildInterestItem('Nature & Hiking', theme),
                                 ],
                               ),
                             ),
@@ -118,23 +109,26 @@ class AboutMePage extends StatelessWidget {
             ),
           ),
           const CustomBackButton(),
+          const PageNavBar(currentPage: 'About'),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDarkMode) {
     return Container(
       width: double.infinity,
       height: 200,
       decoration: BoxDecoration(
         color: Colors.black,
         image: DecorationImage(
-          image: const AssetImage('assets/homescreen.png'),
+          image: AssetImage(
+            isDarkMode ? 'assets/homescreen.png' : 'assets/lightMode_homescreen.png'
+          ),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.7),
-            BlendMode.darken,
+            isDarkMode ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.2),
+            isDarkMode ? BlendMode.darken : BlendMode.lighten,
           ),
         ),
       ),
@@ -144,36 +138,28 @@ class AboutMePage extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 48,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildParagraph(String text) {
+  Widget _buildParagraph(String text, ThemeData theme) {
     return Text(
       text,
-      style: GoogleFonts.inter(
-        fontSize: 16,
-        height: 1.8,
-        color: Colors.grey[300],
-      ),
+      style: theme.textTheme.bodyLarge,
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, ThemeData theme) {
     return Text(
       title,
-      style: GoogleFonts.inter(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
+      style: theme.textTheme.titleLarge,
     );
   }
 
-  Widget _buildStrengthItem(String title, String description) {
+  Widget _buildStrengthItem(String title, String description, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -184,39 +170,33 @@ class AboutMePage extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF0066FF),
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             description,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: Colors.grey[400],
-            ),
+            style: theme.textTheme.bodyMedium,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInterestItem(String text) {
+  Widget _buildInterestItem(String text, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Icon(
             Icons.arrow_right,
-            color: const Color(0xFF0066FF),
+            color: theme.colorScheme.primary,
             size: 20,
           ),
           const SizedBox(width: 8),
           Text(
             text,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: Colors.grey[300],
-            ),
+            style: theme.textTheme.bodyMedium,
           ),
         ],
       ),
