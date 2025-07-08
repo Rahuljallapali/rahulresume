@@ -12,6 +12,7 @@ import '../utils/download_helper.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/page_nav_bar.dart';
+import '../services/email_service.dart';
 
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
@@ -24,6 +25,12 @@ class _ContactPageState extends State<ContactPage> {
   final _formKey = GlobalKey<FormState>();
   late ConfettiController _confettiController;
   bool _showSuccess = false;
+  bool _isLoading = false;
+  
+  // Form controllers
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
 
   @override
   void initState() {
@@ -34,6 +41,9 @@ class _ContactPageState extends State<ContactPage> {
   @override
   void dispose() {
     _confettiController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _messageController.dispose();
     super.dispose();
   }
 
@@ -49,6 +59,55 @@ class _ContactPageState extends State<ContactPage> {
         });
       }
     });
+  }
+
+  Future<void> _submitForm() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final success = await EmailService.sendEmail(
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          message: _messageController.text.trim(),
+        );
+
+        if (success) {
+          _showConfetti();
+          // Clear form
+          _nameController.clear();
+          _emailController.clear();
+          _messageController.clear();
+        } else {
+          // Show error message
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Failed to send message. Please try again.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
   }
 
   @override
@@ -186,8 +245,8 @@ class _ContactPageState extends State<ContactPage> {
             _buildContactCard(
               icon: Icons.email,
               title: 'Email',
-              content: 'rahul.jallapalli.dev@gmail.com',
-              onTap: () => _launchURL('mailto:rahul.jallapalli.dev@gmail.com'),
+              content: 'rahuljallapalli57@gmail.com',
+              onTap: () => _launchURL('mailto: rahuljallapalli57@gmail.com'),
               theme: theme,
               isDarkMode: isDarkMode,
             ),
@@ -464,6 +523,7 @@ class _ContactPageState extends State<ContactPage> {
               label: 'Name',
               theme: theme,
               isDarkMode: isDarkMode,
+              controller: _nameController,
               validator: (value) =>
                   value?.isEmpty ?? true ? 'Please enter your name' : null,
             ),
@@ -472,6 +532,7 @@ class _ContactPageState extends State<ContactPage> {
               label: 'Email',
               theme: theme,
               isDarkMode: isDarkMode,
+              controller: _emailController,
               validator: (value) {
                 if (value?.isEmpty ?? true) {
                   return 'Please enter your email';
@@ -488,6 +549,7 @@ class _ContactPageState extends State<ContactPage> {
               label: 'Message',
               theme: theme,
               isDarkMode: isDarkMode,
+              controller: _messageController,
               maxLines: 5,
               validator: (value) =>
                   value?.isEmpty ?? true ? 'Please enter your message' : null,
@@ -511,11 +573,7 @@ class _ContactPageState extends State<ContactPage> {
                       ],
                     )
                   : ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          _showConfetti();
-                        }
-                      },
+                      onPressed: _isLoading ? null : _submitForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.primary,
                         padding: const EdgeInsets.symmetric(
@@ -529,14 +587,26 @@ class _ContactPageState extends State<ContactPage> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.send,
-                            color: theme.colorScheme.onPrimary,
-                            size: 20,
-                          ),
+                          if (_isLoading)
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  theme.colorScheme.onPrimary,
+                                ),
+                              ),
+                            )
+                          else
+                            Icon(
+                              Icons.send,
+                              color: theme.colorScheme.onPrimary,
+                              size: 20,
+                            ),
                           const SizedBox(width: 8),
                           Text(
-                            'Send Message',
+                            _isLoading ? 'Sending...' : 'Send Message',
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -557,10 +627,12 @@ class _ContactPageState extends State<ContactPage> {
     required String label,
     required ThemeData theme,
     required bool isDarkMode,
+    TextEditingController? controller,
     int maxLines = 1,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
+      controller: controller,
       maxLines: maxLines,
       validator: validator,
       style: theme.textTheme.bodyLarge,

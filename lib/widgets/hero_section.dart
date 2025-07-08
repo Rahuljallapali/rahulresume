@@ -69,7 +69,7 @@ class HeroSection extends StatelessWidget {
                     end: Alignment.bottomRight,
                   ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
                   child: Text(
-                    'Flutter Developer',
+                    'Software Developer',
                     style: GoogleFonts.inter(
                       fontSize: 56,
                       fontWeight: FontWeight.w800,
