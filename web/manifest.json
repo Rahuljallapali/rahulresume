@@ -1,13 +1,14 @@
 {
-    "name": "Rahul Jallapalli - Flutter Developer",
-    "short_name": "Rahul Resume",
+    "name": "Rahul Jallapalli — Software Engineer",
+    "short_name": "Rahul J.",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "Rahul Jallapalli's Professional Resume",
-    "orientation": "portrait-primary",
+    "background_color": "#08090C",
+    "theme_color": "#08090C",
+    "description": "Portfolio of Rahul Jallapalli — software engineer working across a production Flutter field-service platform and its Java 21 / Spring Boot backend.",
+    "orientation": "any",
     "prefer_related_applications": false,
+    "categories": ["portfolio", "productivity"],
     "icons": [
         {
             "src": "icons/Icon-192.png",
