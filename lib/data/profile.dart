@@ -37,7 +37,7 @@ abstract final class Profile {
   static const githubUser = 'rahuljallapalli';
   static const githubUrl = 'https://github.com/rahuljallapalli';
   static const linkedInUrl = 'https://www.linkedin.com/in/rahul-jallapalli';
-  static const siteUrl = 'https://rahuljallapalli.github.io/rahulresume';
+  static const siteUrl = 'https://rahuljallapali.github.io/rahulresume';
 
   /// Headline. Concrete enough that a reader knows within one sentence what
   /// kind of engineer this is — and that the backend comes first.
