@@ -1,63 +1,289 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="/rahulresume/">
 
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Rahul Jallapalli's Professional Resume">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-  <!-- iOS meta tags & icons -->
+  <title>Rahul Jallapalli — Software Engineer, Java · Spring Boot · Flutter</title>
+  <meta name="description" content="Software engineer who owns the real-time token-signing, push-delivery and OTP paths of a Java 21 / Spring Boot 3 multi-tenant backend, and ships the Flutter apps it powers — live on the App Store and Google Play. Offline-first sync, real-time video, AWS, Docker.">
+  <meta name="author" content="Rahul Jallapalli">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://rahuljallapali.github.io/rahulresume/">
+
+  <!-- Painted by the browser before Flutter boots, so the shell never flashes
+       white in dark mode or black in light mode. -->
+  <meta name="theme-color" content="#FBFBFD" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#08090C" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="Rahul Jallapalli — Software Engineer, Java · Spring Boot · Flutter">
+  <meta property="og:description" content="Owns real-time token signing, push delivery and OTP in a multi-tenant Spring Boot service — and ships the Flutter apps on top: Serveiz and MIDC, live on the App Store and Google Play.">
+  <meta property="og:url" content="https://rahuljallapali.github.io/rahulresume/">
+  <meta property="og:image" content="https://rahuljallapali.github.io/rahulresume/icons/Icon-512.png">
+  <meta property="og:locale" content="en_US">
+  <meta property="profile:first_name" content="Rahul">
+  <meta property="profile:last_name" content="Jallapalli">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Rahul Jallapalli — Software Engineer, Java · Spring Boot · Flutter">
+  <meta name="twitter:description" content="Spring Boot backend engineering and store-shipped Flutter apps. Real-time video, offline-first sync, AWS, Docker.">
+  <meta name="twitter:image" content="https://rahuljallapali.github.io/rahulresume/icons/Icon-512.png">
+
+  <!-- iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Rahul Resume">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rahul Jallapalli">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <title>Rahul Jallapalli - Flutter Developer</title>
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="manifest" href="manifest.json">
 
-  <script>
-    // The value below is injected by flutter build, do not touch.
-    const serviceWorkerVersion = "3199101528";
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!--
+    Structured data. A Flutter app paints to canvas, so a crawler cannot read
+    the rendered page — this block plus the #seo-fallback content below is what
+    search engines and link unfurlers actually index.
+  -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Rahul Jallapalli",
+    "jobTitle": "Software Engineer — Java, Spring Boot, Flutter",
+    "url": "https://rahuljallapali.github.io/rahulresume/",
+    "email": "mailto:rahuljallapalli57@gmail.com",
+    "worksFor": { "@type": "Organization", "name": "Swensa" },
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Hyderabad",
+      "addressCountry": "IN"
+    },
+    "sameAs": [
+      "https://github.com/rahuljallapalli",
+      "https://www.linkedin.com/in/rahul-jallapalli"
+    ],
+    "knowsAbout": [
+      "Java", "Spring Boot", "Spring Security", "REST API design",
+      "JPA", "Hibernate", "MySQL", "JWT authentication", "Quartz",
+      "Multi-tenant architecture", "Flutter", "Dart", "SQLite",
+      "Offline-first architecture", "Agora RTC",
+      "Firebase Cloud Messaging", "Google Maps Platform", "AWS S3",
+      "AWS Textract", "Docker"
+    ]
+  }
   </script>
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
+
+  <style>
+    :root { color-scheme: light dark; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #FBFBFD;
+      font-family: Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      html, body { background: #08090C; }
+    }
+
+    /* Boot splash. Removed by the Flutter entrypoint once the first frame is
+       committed, so there is no gap between splash and app. */
+    #boot {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      z-index: 9999;
+      transition: opacity .45s ease, visibility .45s ease;
+    }
+    #boot.done { opacity: 0; visibility: hidden; }
+
+    .mark {
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #3355E8, #0E9C94);
+      display: grid; place-items: center;
+      color: #fff; font-weight: 700; font-size: 20px;
+      animation: breathe 2s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(51,85,232,.35); }
+      50%      { transform: scale(1.05); box-shadow: 0 0 0 14px rgba(51,85,232,0); }
+    }
+
+    .boot-name { font-size: 14px; font-weight: 600; color: #0C0E14; letter-spacing: -.2px; }
+    .boot-role { font-size: 12px; color: #848B99; }
+    @media (prefers-color-scheme: dark) {
+      .boot-name { color: #F5F6F8; }
+      .boot-role { color: #6E7480; }
+    }
+
+    .track { width: 132px; height: 2px; border-radius: 2px; background: rgba(128,128,128,.22); overflow: hidden; }
+    .track i { display: block; height: 100%; width: 40%; border-radius: 2px;
+               background: linear-gradient(90deg, #3355E8, #0E9C94);
+               animation: slide 1.15s ease-in-out infinite; }
+    @keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(320%); } }
+
+    /* Respect the OS reduced-motion setting even during boot. */
+    @media (prefers-reduced-motion: reduce) {
+      .mark, .track i { animation: none; }
+      #boot { transition: none; }
+    }
+
+    /*
+      Crawler-readable content. Positioned off-screen rather than
+      `display:none` — hidden content is discounted by search engines, whereas
+      off-screen text that mirrors the rendered page is legitimate. It is also
+      the real fallback for anyone whose browser cannot run the app.
+    */
+    #seo-fallback {
+      position: absolute;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    noscript #seo-fallback,
+    #seo-fallback.visible {
+      position: static;
+      width: auto; height: auto;
+      clip: auto;
+      white-space: normal;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px;
+      line-height: 1.6;
+    }
+  </style>
 </head>
 <body>
+
+  <div id="boot">
+    <div class="mark">R</div>
+    <div style="text-align:center">
+      <div class="boot-name">Rahul Jallapalli</div>
+      <div class="boot-role">Java · Spring Boot · Flutter</div>
+    </div>
+    <div class="track"><i></i></div>
+  </div>
+
+  <div id="seo-fallback">
+    <h1>Rahul Jallapalli — Software Engineer, Java · Spring Boot · Flutter</h1>
+    <p>
+      Software engineer who owns the real-time token-signing, push-delivery
+      and OTP verification paths of a Java 21 and Spring Boot 3 multi-tenant
+      backend (180 REST controllers, 185 JPA entities), and holds production
+      ownership of the 95,000-line Flutter field-service platform on top of
+      it, shipped to the Apple App Store and Google Play. Experience spans JWT
+      and Spring Security, Quartz scheduling, real-time video with in-house
+      Agora token signing, offline-first SQLite synchronisation, Google Maps
+      live tracking, on-device Tesseract OCR, and AWS S3 and Textract document
+      pipelines deployed as a Docker image on EC2.
+    </p>
+
+    <h2>Published apps</h2>
+    <ul>
+      <li><strong>Serveiz</strong> — field-service operations. Primary engineer, 540 of 727 commits, 52 store builds. Live on the <a href="https://apps.apple.com/in/app/serveiz/id6470789389">Apple App Store</a> and <a href="https://play.google.com/store/apps/details?id=com.swensa.serveiz">Google Play</a>.</li>
+      <li><strong>MIDC</strong> — healthcare field app for Metro Infectious Disease Consultants. Backend and mobile contributor. Live on <a href="https://play.google.com/store/apps/details?id=com.swensa.m1dc">Google Play</a>.</li>
+      <li><strong>DIMS</strong> — carried through Apple App Store submission end to end as release engineer.</li>
+      <li><strong>NNIMS</strong> — Bluetooth Low Energy beacon scanning, with native iOS and Android BLE bridged into a Flutter client and readings ingested by the Spring Boot platform. Backend and mobile engineer. Distributed internally, no public listing.</li>
+    </ul>
+
+    <h2>Experience</h2>
+    <h3>Software Engineer — Swensa (January 2024 – Present, Hyderabad, India)</h3>
+    <ul>
+      <li>Owns three backend systems end to end in the Java 21 and Spring Boot 3.2 multi-tenant service: the in-house Agora token-signing service, Firebase Cloud Messaging delivery with de-duplication, and OTP verification — across 79 commits in a 180-controller, 185-entity codebase.</li>
+      <li>Own the Serveiz Flutter client of 554 Dart files and roughly 95,000 lines, shipped through 52 production builds to both app stores; authored 540 of the repository's 727 commits.</li>
+      <li>Contribute to MIDC, the healthcare field app serving over 100 physicians, including OTP verification through the MIDC SMS gateway.</li>
+      <li>Build NNIMS, a Bluetooth Low Energy beacon-scanning application, across both ends — native iOS and Android BLE bridged into the Flutter client through platform channels, and the Spring Boot endpoints that ingest the readings.</li>
+      <li>Run iOS release engineering: signing, provisioning, TestFlight and App Store review.</li>
+      <li>Built real-time video assistance with live annotation over the stream using Agora RTC, with server-signed tokens, CallKit full-screen call UI and APNs VoIP push.</li>
+      <li>Designed an offline-first SQLite data layer so captures survive total connectivity loss and reconcile on reconnect.</li>
+      <li>Shipped live GPS tracking and route rendering with the Google Maps platform.</li>
+      <li>Integrated on-device Tesseract OCR and barcode scanning with client-side media compression for low-bandwidth uploads.</li>
+      <li>Built a localisation pipeline merging server-delivered strings into bundled English and Spanish catalogues.</li>
+      <li>Wrote device-level integration test suites for task, work-order and inventory journeys.</li>
+      <li>Drove crash-free users from 98.9% at build 30 to 99.7% at build 52, using the Firebase Crashlytics signal to find and fix notification and call-handling defects.</li>
+    </ul>
+
+    <h2>Selected work</h2>
+    <h3>Multi-Tenant Service Backend</h3>
+    <p>Java 21 and Spring Boot 3.2 service covering work-order lifecycle, inventory, scheduling, document generation, payments and push delivery across customer tenants. Spring Security, JWT, JPA, MySQL, Quartz, MapStruct, Caffeine, AWS S3, AWS Textract, Stripe, OpenAPI.</p>
+    <h3>Field-Service Mobile Platform</h3>
+    <p>Flutter application for field technicians covering work orders, evidence capture, inventory and remote expert video assistance. Flutter, Dart, GetX, SQLite, Dio, Agora RTC, Google Maps, Firebase, Tesseract OCR.</p>
+    <h3>Natural-Language Data Assistant</h3>
+    <p>Question-answering endpoint over customer service data, with tenant scope enforced server-side and request-id tracing across the Java and Python tiers.</p>
+    <h3>Work-Order Reference API (public source)</h3>
+    <p>A multi-tenant work-order API small enough to review in one sitting — JWT auth, tenant scope from the token, an idempotent completion path and a status machine, with tests that prove the tenant wall over real HTTP. Java 21, Spring Boot 3.3, on <a href="https://github.com/rahuljallapalli/workorder-api">GitHub</a>.</p>
+
+    <h2>Writing</h2>
+    <ul>
+      <li>Sign your own real-time tokens — why an Agora token broker belongs inside the service that owns the domain.</li>
+      <li>Offline-first is a data-layer decision — moving the source of truth onto the device rather than patching the UI.</li>
+      <li>Order your Dockerfile by what changes — layer caching for an image carrying an OCR and AWS toolchain.</li>
+    </ul>
+
+    <h2>Technical skills</h2>
+    <p><strong>Languages:</strong> Java, Dart, SQL, Python, Bash, Kotlin, Swift.</p>
+    <p><strong>Backend:</strong> Spring Boot 3, Spring Security, JPA and Hibernate, REST API design, Quartz, MapStruct.</p>
+    <p><strong>Mobile:</strong> Flutter, GetX, Provider, offline-first synchronisation, platform channels, Flutter Web.</p>
+    <p><strong>Data:</strong> MySQL, SQLite, Caffeine, Firebase Cloud Messaging.</p>
+    <p><strong>Cloud and DevOps:</strong> Docker, AWS S3, AWS Textract, AWS EC2, Firebase Crashlytics.</p>
+    <p><strong>Real-time and media:</strong> Agora RTC, FCM and APNs VoIP push, Google Maps, Tesseract OCR, media compression.</p>
+    <p><strong>Testing:</strong> Flutter integration_test, JUnit 5, widget testing, code review.</p>
+
+    <h2>Contact</h2>
+    <p>
+      Email: <a href="mailto:rahuljallapalli57@gmail.com">rahuljallapalli57@gmail.com</a> ·
+      GitHub: <a href="https://github.com/rahuljallapalli">github.com/rahuljallapalli</a> ·
+      LinkedIn: <a href="https://www.linkedin.com/in/rahul-jallapalli">rahul-jallapalli</a>
+    </p>
+  </div>
+
+  <noscript>
+    <style>
+      #boot { display: none; }
+      #seo-fallback { position: static !important; width: auto !important; height: auto !important;
+                      clip: auto !important; white-space: normal !important;
+                      max-width: 720px; margin: 0 auto; padding: 48px 24px; line-height: 1.6; }
+    </style>
+  </noscript>
+
   <script>
-    window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        }
-      }).then(function(engineInitializer) {
-        return engineInitializer.initializeEngine();
-      }).then(function(appRunner) {
-        return appRunner.runApp();
-      });
+    // Hide the splash once Flutter has committed its first frame. Listening
+    // for the app's own signal rather than window.load avoids the splash
+    // disappearing while the canvas is still blank.
+    window.addEventListener('flutter-first-frame', function () {
+      var boot = document.getElementById('boot');
+      if (boot) boot.classList.add('done');
+      // The off-screen copy stays in the DOM for crawlers, but is removed from
+      // the accessibility tree so a screen reader does not read the page twice.
+      var seo = document.getElementById('seo-fallback');
+      if (seo) seo.setAttribute('aria-hidden', 'true');
     });
+
+    // If the engine fails to boot at all, surface the readable résumé instead
+    // of leaving a spinner running forever.
+    setTimeout(function () {
+      if (!document.querySelector('flutter-view, flt-glass-pane')) {
+        var boot = document.getElementById('boot');
+        if (boot) boot.classList.add('done');
+        var seo = document.getElementById('seo-fallback');
+        if (seo) seo.classList.add('visible');
+      }
+    }, 12000);
   </script>
+
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
