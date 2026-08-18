@@ -9,6 +9,96 @@ import 'models.dart';
 abstract final class Notes {
   static const all = <Note>[
     Note(
+      slug: 'the-endpoints-before-the-token',
+      title: 'The endpoints that run before a token exists',
+      dek: 'Roughly forty of our two hundred routes answer to strangers. '
+          'They are the smallest part of the API and by far the most '
+          'dangerous, because the rule the rest of the service depends on '
+          'does not apply to them.',
+      date: '4 August 2026',
+      readingMinutes: 5,
+      tags: ['Spring Boot', 'Security', 'API design'],
+      body: [
+        NoteBlock.paragraph(
+          'Almost every endpoint in our service enjoys a comfortable '
+          'assumption: by the time a request reaches the controller, a filter '
+          'has verified a token and the caller\'s tenant is known. Nothing '
+          'downstream reads identity from the request body, so a client '
+          'cannot claim to be someone else by editing JSON.',
+        ),
+        NoteBlock.paragraph(
+          'Then there is the handful of routes that cannot make that '
+          'assumption, because they are how a caller becomes authenticated in '
+          'the first place: sign-up, one-time-password request and '
+          'verification, resend, forgotten password, reset, and a couple of '
+          'health checks. In a service of about two hundred controllers, '
+          'roughly forty routes sit outside the wall.',
+        ),
+        NoteBlock.heading('The rule inverts, and that is the whole problem'),
+        NoteBlock.paragraph(
+          'Everywhere else, the tenant comes from the token and never from '
+          'the request. On these endpoints there is no token yet — so the '
+          'tenant has to come from the request. A caller asking for an OTP '
+          'must say which customer they belong to before anything can be '
+          'sent to them.',
+        ),
+        NoteBlock.paragraph(
+          'That single inversion is where the risk lives. An identifier '
+          'supplied by an unauthenticated stranger is now steering a lookup, '
+          'a message, and eventually an account. Every defence on these '
+          'routes exists because of it.',
+        ),
+        NoteBlock.heading('Deny by default, and keep the list short'),
+        NoteBlock.paragraph(
+          'The security configuration is an explicit allowlist followed by a '
+          'catch-all. New endpoints are protected the moment they are '
+          'written, because the default is refusal rather than permission — '
+          'the only way to expose something is to name it deliberately.',
+        ),
+        NoteBlock.code(
+          '''http.authorizeHttpRequests(auth -> auth
+        // Everything that answers to strangers, named one route at a time.
+        .requestMatchers(publicRoutes()).permitAll()
+        // Anything not on that list — including whatever gets written
+        // tomorrow — needs a verified token.
+        .anyRequest().authenticated())
+    .sessionManagement(s -> s.sessionCreationPolicy(STATELESS))
+    .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);''',
+          language: 'java',
+        ),
+        NoteBlock.paragraph(
+          'The ordering matters more than it looks. A denylist — block these, '
+          'allow the rest — fails silently and permanently the first time '
+          'somebody adds a controller and forgets to update it. An allowlist '
+          'fails loudly: the new endpoint returns 401 until its author makes '
+          'a conscious decision about it.',
+        ),
+        NoteBlock.heading('What these routes have to be careful about'),
+        NoteBlock.bullets([
+          'Enumeration. A forgotten-password endpoint that says "no such '
+              'user" for one address and "email sent" for another is an '
+              'account-discovery service. The response must not vary with '
+              'whether the account exists.',
+          'Cost. Every OTP request spends real money at an SMS gateway and '
+              'rings a real phone. Unmetered, it is both a bill and a way to '
+              'harass a stranger, so requests are bounded per number and per '
+              'window.',
+          'Lifetime. A code that never expires, or that works twice, is a '
+              'password with a shorter name. Single use, short window.',
+          'Blast radius. These endpoints get the narrowest possible response '
+              'shapes. A verification route returns whether verification '
+              'succeeded — never the customer record it happened to load '
+              'along the way.',
+        ]),
+        NoteBlock.callout(
+          'A useful review question for any service: which routes answer to '
+          'someone with no credentials, and can you list them from memory? '
+          'If the list is longer than you expected, or nobody is sure, that '
+          'is the part of the API worth reading first.',
+        ),
+      ],
+    ),
+    Note(
       slug: 'signing-agora-tokens-in-service',
       title: 'Sign your own real-time tokens',
       dek: 'Putting a third-party token broker in the path of a support call '

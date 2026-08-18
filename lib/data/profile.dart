@@ -561,65 +561,6 @@ abstract final class Profile {
       privateNote: 'Private repository.',
     ),
     Project(
-      slug: 'workorder-api',
-      name: 'Work-Order Reference API',
-      role: 'Personal project · public source',
-      kind: ProjectKind.personal,
-      summary:
-          'The Spring services I build at work are private, so this is one '
-          'you can actually read: a multi-tenant work-order API small enough '
-          'to review in one sitting, making the same decisions as the big '
-          'system at readable scale.',
-      tags: ['Backend'],
-      stack: [
-        'Java 21',
-        'Spring Boot 3.3',
-        'Spring Security',
-        'JWT',
-        'JPA / Hibernate',
-        'H2',
-        'OpenAPI',
-        'JUnit 5',
-        'Docker',
-      ],
-      architecture:
-          'Controller → service → repository over an H2 store, stateless JWT '
-          'auth via a request filter, and a work-order status machine whose '
-          'legal transitions live in the enum itself. Every repository read '
-          'requires a tenant id sourced from the token, so a cross-tenant '
-          'query is unrepresentable rather than merely forbidden.',
-      challenge:
-          'Saying "I enforce tenant boundaries on the server" is a claim; '
-          'this repository is the claim made executable — including a test '
-          'that signs in as a second tenant and proves the first tenant\'s '
-          'orders are invisible to it.',
-      highlights: [
-        ProjectHighlight(
-          title: 'Tenant scope from the token, never the request',
-          body: 'The tenant id is read from the verified JWT and threaded '
-              'into every repository call — the same rule the production '
-              'platform enforces, in a form you can read.',
-        ),
-        ProjectHighlight(
-          title: 'Idempotent completion',
-          body: 'Completing an already-completed order returns the original '
-              'result instead of failing or double-charging — the retry '
-              'behaviour an offline-first client depends on.',
-        ),
-        ProjectHighlight(
-          title: 'Status machine in the type',
-          body: 'Legal transitions are declared on the enum; an illegal one '
-              'is a 409 with the reason, not a silent state corruption.',
-        ),
-        ProjectHighlight(
-          title: 'Zero-setup run',
-          body: 'H2 in memory, seeded on boot, Swagger UI included — clone, '
-              'run, and the API is explorable in under a minute.',
-        ),
-      ],
-      repoUrl: 'https://github.com/rahuljallapalli/workorder-api',
-    ),
-    Project(
       slug: 'this-portfolio',
       name: 'This Portfolio',
       role: 'Personal project',

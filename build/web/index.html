@@ -226,14 +226,13 @@
     <p>Flutter application for field technicians covering work orders, evidence capture, inventory and remote expert video assistance. Flutter, Dart, GetX, SQLite, Dio, Agora RTC, Google Maps, Firebase, Tesseract OCR.</p>
     <h3>Natural-Language Data Assistant</h3>
     <p>Question-answering endpoint over customer service data, with tenant scope enforced server-side and request-id tracing across the Java and Python tiers.</p>
-    <h3>Work-Order Reference API (public source)</h3>
-    <p>A multi-tenant work-order API small enough to review in one sitting — JWT auth, tenant scope from the token, an idempotent completion path and a status machine, with tests that prove the tenant wall over real HTTP. Java 21, Spring Boot 3.3, on <a href="https://github.com/rahuljallapalli/workorder-api">GitHub</a>.</p>
 
     <h2>Writing</h2>
     <ul>
       <li>Sign your own real-time tokens — why an Agora token broker belongs inside the service that owns the domain.</li>
       <li>Offline-first is a data-layer decision — moving the source of truth onto the device rather than patching the UI.</li>
       <li>Order your Dockerfile by what changes — layer caching for an image carrying an OCR and AWS toolchain.</li>
+      <li>The endpoints that run before a token exists — designing the unauthenticated surface of a multi-tenant Spring Boot service.</li>
     </ul>
 
     <h2>Technical skills</h2>
