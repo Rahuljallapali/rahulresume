@@ -88,6 +88,18 @@ abstract final class ResumePdf {
           ].join('  ·  '),
           style: const pw.TextStyle(fontSize: 8.5, color: _muted),
         ),
+        pw.SizedBox(height: 3),
+        // Experience and notice period are what a recruiter screens on first,
+        // so they sit in the header rather than buried in the body.
+        pw.Text(
+          [
+            '${Profile.experience} experience',
+            if (Profile.noticePeriod.isNotEmpty)
+              'Notice period: ${Profile.noticePeriod}',
+            Profile.openToRelocation,
+          ].join('  ·  '),
+          style: const pw.TextStyle(fontSize: 8.5, color: _muted),
+        ),
         pw.SizedBox(height: 10),
         pw.Container(height: 2, color: _accent, width: 46),
       ],

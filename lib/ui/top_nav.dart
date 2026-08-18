@@ -288,7 +288,7 @@ class _PaletteButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(Radii.pill),
           child: Container(
             padding:
-                EdgeInsets.symmetric(horizontal: wide ? 12 : 9, vertical: 8),
+                EdgeInsets.symmetric(horizontal: wide ? 18 : 11, vertical: 8),
             decoration: BoxDecoration(
               color: c.glassFill,
               borderRadius: BorderRadius.circular(Radii.pill),
@@ -299,7 +299,7 @@ class _PaletteButton extends StatelessWidget {
               children: [
                 Icon(Icons.search_rounded, size: 14, color: c.textTertiary),
                 if (wide) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Text(
                     'Ctrl K',
                     style: theme.textTheme.bodySmall

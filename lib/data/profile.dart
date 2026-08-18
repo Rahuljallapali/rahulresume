@@ -164,7 +164,7 @@ abstract final class Profile {
   static const phone = '';
 
   /// The first question in almost every Indian recruiter screen.
-  static const noticePeriod = '';
+  static const noticePeriod = '30 days';
 
   static const openToRelocation = 'Open to relocation and remote';
 
