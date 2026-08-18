@@ -39,7 +39,11 @@ class AppsSection extends StatelessWidget {
           ),
           const SizedBox(height: Space.xl),
           AutoGrid(
-            columns: context.responsive(compact: 1, medium: 2, wide: 3),
+            // All four on one line once there is room; equal height so they
+            // read as a set rather than four unrelated boxes.
+            columns: context.responsive(compact: 1, medium: 2, wide: 4),
+            spacing: Space.md,
+            equalHeight: true,
             children: [
               for (var i = 0; i < Profile.storeApps.length; i++)
                 Reveal(
@@ -133,6 +137,9 @@ class _AppCard extends StatelessWidget {
             runSpacing: Space.sm,
             children: [for (final s in app.stack) TagChip(s)],
           ),
+          // Absorbs the slack from equal-height stretching, so the store
+          // badges sit on the same line across every card in the row.
+          const Spacer(),
           const SizedBox(height: Space.md),
           Divider(color: c.hairline),
           const SizedBox(height: Space.sm),
@@ -265,30 +272,39 @@ class _ReleaseChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Radii.sm),
-        border: Border.all(color: c.hairline),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.rocket_launch_outlined, size: 14, color: c.textSecondary),
-          const SizedBox(width: 8),
-          // Flexible: on the narrowest cards the sentence wraps to a second
-          // line rather than running out of the chip.
-          Flexible(
-            child: Text(
-              'Shipped via App Store Connect',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: c.textSecondary,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
+    return Tooltip(
+      message: 'Carried through App Store Connect submission and review',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(Radii.sm),
+          border: Border.all(color: c.hairline),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.rocket_launch_outlined,
+                size: 14, color: c.textSecondary),
+            const SizedBox(width: 8),
+            // Single line, always. These chips sit inside a Wrap that is itself
+            // inside an IntrinsicHeight: Wrap reports its intrinsic height by
+            // measuring children at their unwrapped width, so a chip that wraps
+            // at layout time is taller than the row was sized for and overflows.
+            // Capping at one line keeps layout height equal to intrinsic height.
+            Flexible(
+              child: Text(
+                'App Store release',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: c.textSecondary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -305,28 +321,35 @@ class _EnterpriseChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Radii.sm),
-        border: Border.all(color: c.hairline),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.business_rounded, size: 14, color: c.textSecondary),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              'Enterprise distribution — no public listing',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: c.textSecondary,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
+    return Tooltip(
+      message: 'Distributed inside the organisation — no public store listing',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(Radii.sm),
+          border: Border.all(color: c.hairline),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.business_rounded, size: 14, color: c.textSecondary),
+            const SizedBox(width: 8),
+            // One line for the same reason as _ReleaseChip; the full wording
+            // lives in the tooltip so nothing is lost.
+            Flexible(
+              child: Text(
+                'Enterprise only',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: c.textSecondary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

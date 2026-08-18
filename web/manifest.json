@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#08090C",
     "theme_color": "#08090C",
-    "description": "Portfolio of Rahul Jallapalli — software engineer working across a production Flutter field-service platform and its Java 21 / Spring Boot backend.",
+    "description": "Portfolio of Rahul Jallapalli — software engineer who owns the real-time token-signing, push-delivery and OTP paths of a Java 21 / Spring Boot multi-tenant backend, and ships the Flutter apps it powers.",
     "orientation": "any",
     "prefer_related_applications": false,
     "categories": ["portfolio", "productivity"],

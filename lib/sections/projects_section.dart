@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../app/lens.dart';
 import '../app/router.dart';
 import '../app/theme/tokens.dart';
 import '../data/models.dart';
@@ -25,13 +27,18 @@ class ProjectsSection extends StatefulWidget {
 class _ProjectsSectionState extends State<ProjectsSection> {
   String _filter = Profile.projectFilters.first;
 
-  List<Project> get _visible => _filter == 'All'
-      ? Profile.projects
-      : Profile.projects.where((p) => p.tags.contains(_filter)).toList();
+  /// Ordered by lens so the flagship the visitor came to see is first, then
+  /// narrowed by the facet they picked.
+  List<Project> _visible(Lens lens) {
+    final ordered = Profile.projectsFor(lens);
+    return _filter == 'All'
+        ? ordered
+        : ordered.where((p) => p.tags.contains(_filter)).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final projects = _visible;
+    final projects = _visible(context.watch<LensController>().lens);
 
     return ContentShell(
       child: Column(

@@ -120,14 +120,8 @@ class _ContactSectionState extends State<ContactSection> {
               ],
             ),
           ),
-        const SizedBox(height: Space.md),
-        Row(
-          children: [
-            Icon(Icons.place_outlined, size: 15, color: c.textTertiary),
-            const SizedBox(width: 9),
-            Text(Profile.location, style: theme.textTheme.bodyMedium),
-          ],
-        ),
+        const SizedBox(height: Space.lg),
+        const _ScreeningFacts(),
       ],
     );
 
@@ -236,6 +230,70 @@ class _ContactSectionState extends State<ContactSection> {
                   Expanded(flex: 6, child: form),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+/// The handful of facts a recruiter checks before writing to anyone.
+///
+/// Answering them here removes a round-trip email from the process. Rows with
+/// no value are skipped entirely rather than shown blank — see the notes on
+/// [Profile.phone] and [Profile.noticePeriod].
+class _ScreeningFacts extends StatelessWidget {
+  const _ScreeningFacts();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final theme = Theme.of(context);
+
+    final facts = <(IconData, String, String)>[
+      (Icons.badge_outlined, 'Experience', Profile.experience),
+      (Icons.place_outlined, 'Based in', Profile.location),
+      (Icons.schedule_rounded, 'Working hours', Profile.timezone),
+      if (Profile.noticePeriod.isNotEmpty)
+        (Icons.event_available_rounded, 'Notice period', Profile.noticePeriod),
+      if (Profile.phone.isNotEmpty)
+        (Icons.call_outlined, 'Phone', Profile.phone),
+      (Icons.flight_takeoff_rounded, 'Mobility', Profile.openToRelocation),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(Space.md),
+      decoration: BoxDecoration(
+        color: c.glassFill,
+        borderRadius: BorderRadius.circular(Radii.md),
+        border: Border.all(color: c.glassBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (icon, label, value) in facts)
+            Padding(
+              padding: const EdgeInsets.only(bottom: Space.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(icon, size: 14, color: c.textTertiary),
+                  const SizedBox(width: 11),
+                  SizedBox(
+                    width: 108,
+                    child: Text(label, style: theme.textTheme.bodySmall),
+                  ),
+                  Expanded(
+                    child: Text(
+                      value,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: c.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

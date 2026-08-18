@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../app/lens.dart';
 import 'models.dart';
 
 /// The single source of truth for every word and number on this site.
@@ -22,7 +23,9 @@ import 'models.dart';
 ///                       (com.swensa.m1dc); DIMS released via App Store Connect
 ///   Crash-free users  — Firebase Crashlytics console: 98.9% at build 30 →
 ///                       99.7% at build 52 (read off by Rahul, Aug 2026)
-///   Tenure            — first commit 2024-01-22, still active 2026-08
+///   Tenure            — joined Swensa Sept 2022 (4 years this Sept); the
+///                       Flutter platform work starts at its first commit,
+///                       2024-01-22, and is still active 2026-08
 abstract final class Profile {
   static const name = 'Rahul Jallapalli';
   static const firstName = 'Rahul';
@@ -40,10 +43,78 @@ abstract final class Profile {
   static const siteUrl = 'https://rahuljallapali.github.io/rahulresume';
 
   /// Headline. Concrete enough that a reader knows within one sentence what
-  /// kind of engineer this is — and that the backend comes first.
+  /// kind of engineer this is.
+  ///
+  /// Default (no lens chosen) leads with both halves, because a reader who
+  /// has not told us which role they are hiring for should see the whole
+  /// picture.
   static const headline =
       'I build Spring Boot backends that run a business — and ship the '
       'Flutter apps on top of them.';
+
+  /// Per-lens headline. Each one leads with the specialism being hired for
+  /// and *still* names the other — "he also builds the other half" is an
+  /// argument for hiring him, not a distraction from it.
+  static String headlineFor(Lens lens) => switch (lens) {
+        Lens.both => headline,
+        Lens.backend =>
+          'I own the security-critical paths of a Spring Boot service that '
+              'runs a field-service business.',
+        Lens.mobile =>
+          'I ship Flutter apps that keep working when the network does not.',
+      };
+
+  static String subheadlineFor(Lens lens) => switch (lens) {
+        Lens.both => subheadline,
+        Lens.backend =>
+          'Java 21 / Spring Boot 3 across a multi-tenant service of 180 REST '
+              'controllers and 185 JPA entities. I own the in-house Agora '
+              'token signing, the de-duplicated push delivery and the OTP '
+              'verification paths — and I also build the Flutter clients that '
+              'consume them, so I design APIs knowing exactly what it costs '
+              'to consume one badly.',
+        Lens.mobile =>
+          'Primary engineer on a 95,000-line Flutter platform shipped through '
+              '52 releases to the App Store and Google Play: offline-first '
+              'SQLite sync, real-time video with live annotation, CallKit and '
+              'VoIP push, Google Maps tracking, on-device OCR. I write the '
+              'Spring Boot endpoints behind it too, so I am never blocked '
+              'waiting on someone else\'s API.',
+      };
+
+  /// The line in the availability pill.
+  static String availabilityFor(Lens lens) => switch (lens) {
+        Lens.both => availability,
+        Lens.backend => 'Open to senior Java / Spring Boot roles',
+        Lens.mobile => 'Open to senior Flutter / mobile roles',
+      };
+
+  /// Metric strip, ordered so the number that matters to this reader is first.
+  static List<Stat> statsFor(Lens lens) => switch (lens) {
+        Lens.both => stats,
+        // stats = [backend systems, apps shipped, crash-free, commit share]
+        Lens.backend => [stats[0], stats[1], stats[3], stats[2]],
+        Lens.mobile => [stats[1], stats[2], stats[3], stats[0]],
+      };
+
+  /// Work, ordered so the flagship for this lens leads.
+  static List<Project> projectsFor(Lens lens) {
+    if (lens == Lens.both) return projects;
+    final leadSlug =
+        lens == Lens.backend ? 'service-backend' : 'field-service-platform';
+    final lead = projects.where((p) => p.slug == leadSlug);
+    final rest = projects.where((p) => p.slug != leadSlug);
+    return [...lead, ...rest];
+  }
+
+  /// Skill groups, with the relevant discipline pulled to the front.
+  static List<SkillGroup> skillGroupsFor(Lens lens) {
+    if (lens == Lens.both) return skillGroups;
+    final leadTitle = lens == Lens.backend ? 'Backend' : 'Mobile';
+    final lead = skillGroups.where((g) => g.title == leadTitle);
+    final rest = skillGroups.where((g) => g.title != leadTitle);
+    return [...lead, ...rest];
+  }
 
   /// Owned systems, not proximity counts. "180 controllers" appears only as
   /// context for where the owned paths live — a claim of breadth would not
@@ -79,6 +150,45 @@ abstract final class Profile {
 
   /// Shown in the footer status line.
   static const timezone = 'IST · UTC+5:30';
+
+  // ---------------------------------------------------------------------------
+  // Screening facts. A recruiter asks these before anything else; answering
+  // them on the page removes a round-trip email from the process.
+  //
+  // The two below are empty until filled in — each row renders only when it
+  // has a value, so nothing is ever asserted on Rahul's behalf.
+  // ---------------------------------------------------------------------------
+
+  /// Publishing a number invites spam calls; left blank deliberately until
+  /// that trade-off is made knowingly.
+  static const phone = '';
+
+  /// The first question in almost every Indian recruiter screen.
+  static const noticePeriod = '';
+
+  static const openToRelocation = 'Open to relocation and remote';
+
+  /// Start at Swensa. Distinct from the mobile repository's first commit
+  /// (2024-01-22) — that is when the Flutter platform work began, more than a
+  /// year into the tenure.
+  static final DateTime careerStart = DateTime(2022, 9);
+
+  /// Derived rather than written down, so the figure cannot go stale between
+  /// edits — the same reason the résumé PDF is generated from this file.
+  static String get experience {
+    final now = DateTime.now();
+    var months =
+        (now.year - careerStart.year) * 12 + (now.month - careerStart.month);
+    if (now.day < careerStart.day) months--;
+    if (months < 0) months = 0;
+
+    final years = months ~/ 12;
+    final rest = months % 12;
+    final yearPart = years == 1 ? '1 year' : '$years years';
+    if (rest == 0) return yearPart;
+    final monthPart = rest == 1 ? '1 month' : '$rest months';
+    return years == 0 ? monthPart : '$yearPart $monthPart';
+  }
 
   static const socials = <SocialLink>[
     SocialLink(
@@ -142,7 +252,7 @@ abstract final class Profile {
     Experience(
       role: 'Software Engineer',
       company: 'Swensa',
-      period: 'Jan 2024 — Present',
+      period: 'Sept 2022 — Present',
       location: 'Hyderabad, India',
       isCurrent: true,
       summary:

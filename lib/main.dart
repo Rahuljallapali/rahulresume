@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'app/lens.dart';
 import 'app/router.dart';
 import 'app/theme/app_theme.dart';
 import 'app/theme/theme_controller.dart';
@@ -16,8 +17,13 @@ class PortfolioApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ThemeController(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeController()),
+        // Which specialism the page leads with. Resolved from ?role= in the
+        // URL, then from storage — see lens.dart.
+        ChangeNotifierProvider(create: (_) => LensController()),
+      ],
       child: Consumer<ThemeController>(
         builder: (context, controller, _) {
           return MaterialApp(

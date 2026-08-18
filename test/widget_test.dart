@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rahul_resume/app/lens.dart';
 import 'package:rahul_resume/app/router.dart';
 import 'package:rahul_resume/app/theme/app_theme.dart';
 import 'package:rahul_resume/app/theme/tokens.dart';
@@ -53,8 +54,31 @@ void main() {
 
     expect(find.text(Profile.headline), findsOneWidget);
     expect(find.text('View my work'), findsOneWidget);
-    expect(find.text('Download résumé'), findsOneWidget);
+    expect(find.text('Download resume'), findsOneWidget);
     expect(find.text(Profile.name), findsWidgets);
+  });
+
+  // The app cards share a height via IntrinsicHeight. Wrap reports its
+  // intrinsic height by measuring each child at its *unwrapped* width — one
+  // line — so a chip whose text wraps at layout time is taller than the row
+  // was sized for, and overflows. It cost 48 pixels in the browser at this
+  // width. The fix is structural: every chip in that Wrap is capped to one
+  // line, so layout height always equals intrinsic height.
+  //
+  // Honest scope: this exercises the narrowest four-across layout (the wide
+  // breakpoint starts at 1080) but does NOT reproduce the original overflow.
+  // The suite falls back to a narrower font than the Manrope the site ships,
+  // so the chip never wraps here — it passes with or without the fix.
+  testWidgets('app cards fit at the narrowest four-column width',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const PortfolioApp());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(tester.takeException(), isNull);
   });
 
   // Regression: the ticker starts from didChangeDependencies, which runs
@@ -382,6 +406,51 @@ void main() {
         expect(prose, greaterThan(400),
             reason: '"${n.title}" is too thin to publish');
       }
+    });
+
+    // The lens reorders content but must never drop or invent any: a
+    // recruiter switching to their specialism should see the same body of
+    // work rearranged, not a shorter page.
+    test('every lens keeps the full body of work', () {
+      for (final lens in Lens.values) {
+        expect(Profile.projectsFor(lens).toSet(), Profile.projects.toSet(),
+            reason: '${lens.slug} lens changed which projects exist');
+        expect(Profile.skillGroupsFor(lens).toSet(),
+            Profile.skillGroups.toSet(),
+            reason: '${lens.slug} lens changed which skills exist');
+        expect(Profile.statsFor(lens).toSet(), Profile.stats.toSet(),
+            reason: '${lens.slug} lens changed which metrics exist');
+      }
+    });
+
+    test('each lens leads with its own specialism', () {
+      expect(Profile.projectsFor(Lens.backend).first.slug, 'service-backend');
+      expect(Profile.projectsFor(Lens.mobile).first.slug,
+          'field-service-platform');
+      expect(Profile.skillGroupsFor(Lens.backend).first.title, 'Backend');
+      expect(Profile.skillGroupsFor(Lens.mobile).first.title, 'Mobile');
+    });
+
+    test('every lens names both disciplines', () {
+      // The whole argument for this candidate is that he does both, so no
+      // lens may hide the other half.
+      for (final lens in Lens.values) {
+        final copy =
+            '${Profile.headlineFor(lens)} ${Profile.subheadlineFor(lens)}'
+                .toLowerCase();
+        expect(copy, contains('spring boot'),
+            reason: '${lens.slug} lens never mentions Spring Boot');
+        expect(copy, contains('flutter'),
+            reason: '${lens.slug} lens never mentions Flutter');
+      }
+    });
+
+    test('role aliases resolve to a sensible lens', () {
+      expect(Lens.fromSlug('flutter'), Lens.mobile);
+      expect(Lens.fromSlug('springboot'), Lens.backend);
+      expect(Lens.fromSlug('java'), Lens.backend);
+      expect(Lens.fromSlug('nonsense'), Lens.both);
+      expect(Lens.fromSlug(null), Lens.both);
     });
 
     test('architecture nodes are explained', () {

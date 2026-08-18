@@ -71,6 +71,7 @@ class AutoGrid extends StatelessWidget {
     required this.columns,
     this.spacing = Space.lg,
     this.runSpacing = Space.lg,
+    this.equalHeight = false,
   });
 
   final List<Widget> children;
@@ -78,21 +79,61 @@ class AutoGrid extends StatelessWidget {
   final double spacing;
   final double runSpacing;
 
+  /// Stretches every card in a row to the height of the tallest one.
+  ///
+  /// A [Wrap] sizes each child independently, so cards whose text runs a line
+  /// longer end up taller than their neighbours — which reads as sloppy when
+  /// the cards are peers. This lays each row out as a [Row] inside an
+  /// [IntrinsicHeight] instead. That is a more expensive layout pass, so it is
+  /// opt-in and only worth it for a handful of cards per row.
+  final bool equalHeight;
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final n = columns.clamp(1, children.isEmpty ? 1 : children.length);
         final width = (constraints.maxWidth - spacing * (n - 1)) / n;
+        final cellWidth = width > 0 ? width : constraints.maxWidth;
 
-        return Wrap(
-          spacing: spacing,
-          runSpacing: runSpacing,
+        if (!equalHeight) {
+          return Wrap(
+            spacing: spacing,
+            runSpacing: runSpacing,
+            children: [
+              for (final child in children)
+                SizedBox(width: cellWidth, child: child),
+            ],
+          );
+        }
+
+        // Chunk into rows of n so the last, possibly short, row still aligns
+        // its cards to the left rather than stretching them across the width.
+        final rows = <List<Widget>>[];
+        for (var i = 0; i < children.length; i += n) {
+          rows.add(children.sublist(
+              i, i + n > children.length ? children.length : i + n));
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (final child in children)
-              SizedBox(
-                  width: width > 0 ? width : constraints.maxWidth,
-                  child: child),
+            for (var r = 0; r < rows.length; r++)
+              Padding(
+                padding: EdgeInsets.only(
+                    bottom: r == rows.length - 1 ? 0 : runSpacing),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < rows[r].length; i++) ...[
+                        if (i != 0) SizedBox(width: spacing),
+                        SizedBox(width: cellWidth, child: rows[r][i]),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
           ],
         );
       },

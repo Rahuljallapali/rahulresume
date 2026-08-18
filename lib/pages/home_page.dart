@@ -238,7 +238,7 @@ class _HomePageState extends State<HomePage> {
             onInvoke: () => AppRouter.openNote(context, n.slug),
           ),
         PaletteCommand(
-          label: 'Download résumé (PDF)',
+          label: 'Download resume (PDF)',
           icon: Icons.file_download_outlined,
           group: 'Action',
           keywords: const ['cv', 'resume', 'pdf'],

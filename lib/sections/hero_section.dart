@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../app/lens.dart';
 import '../app/theme/tokens.dart';
 import '../data/models.dart';
 import '../data/profile.dart';
 import '../services/resume_download.dart';
 import '../ui/code_card.dart';
 import '../ui/layout.dart';
+import '../ui/lens_toggle.dart';
 import '../ui/primitives.dart';
 import '../ui/reveal.dart';
 import '../utils/link.dart';
@@ -83,6 +86,7 @@ class _HeroCopy extends StatelessWidget {
     final c = AppColors.of(context);
     final theme = Theme.of(context);
     final compact = context.isCompact;
+    final lens = context.watch<LensController>().lens;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,17 +129,32 @@ class _HeroCopy extends StatelessWidget {
         ),
         const SizedBox(height: Space.md),
 
-        // The headline is the single most important string on the site.
+        // Lets a visitor say which role they are hiring for. Also settable by
+        // link (?role=backend / ?role=flutter) so an application can point
+        // straight at the relevant version.
+        const Reveal(
+          delay: Duration(milliseconds: 90),
+          child: LensToggle(),
+        ),
+        const SizedBox(height: Space.lg),
+
+        // The headline is the single most important string on the site, so it
+        // is the first thing the lens changes. Keyed so the switcher animates
+        // the swap rather than snapping.
         Reveal(
           delay: const Duration(milliseconds: 120),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 900),
-            child: Text(
-              Profile.headline,
-              style: (compact
-                      ? theme.textTheme.displaySmall
-                      : theme.textTheme.displayMedium)
-                  ?.copyWith(height: 1.08),
+            child: AnimatedSwitcher(
+              duration: Motion.base,
+              child: Text(
+                Profile.headlineFor(lens),
+                key: ValueKey('headline-${lens.slug}'),
+                style: (compact
+                        ? theme.textTheme.displaySmall
+                        : theme.textTheme.displayMedium)
+                    ?.copyWith(height: 1.08),
+              ),
             ),
           ),
         ),
@@ -145,9 +164,13 @@ class _HeroCopy extends StatelessWidget {
           delay: const Duration(milliseconds: 180),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 660),
-            child: Text(
-              Profile.subheadline,
-              style: theme.textTheme.bodyLarge,
+            child: AnimatedSwitcher(
+              duration: Motion.base,
+              child: Text(
+                Profile.subheadlineFor(lens),
+                key: ValueKey('sub-${lens.slug}'),
+                style: theme.textTheme.bodyLarge,
+              ),
             ),
           ),
         ),
@@ -192,42 +215,166 @@ class _HeroCopy extends StatelessWidget {
   }
 }
 
-/// Photo with a graceful fallback: if the asset is ever missing, a monogram
-/// renders instead of a broken-image box.
-class _Avatar extends StatelessWidget {
+/// Circular photo that opens the full portrait when tapped.
+///
+/// The square asset is cropped tight on the face so it still reads at 54px;
+/// the dialog shows the uncropped portrait. Falls back to a monogram if the
+/// asset is ever missing, rather than a broken-image box.
+class _Avatar extends StatefulWidget {
   const _Avatar();
+
+  @override
+  State<_Avatar> createState() => _AvatarState();
+}
+
+class _AvatarState extends State<_Avatar> {
+  bool _hovered = false;
+
+  void _open() {
+    showDialog<void>(
+      context: context,
+      // Dark enough that the portrait is the only thing on screen; the
+      // barrier itself dismisses, as does Esc via the Navigator.
+      barrierColor: Colors.black.withValues(alpha: 0.86),
+      barrierLabel: 'Close photo',
+      builder: (_) => const _PortraitDialog(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    final active = _hovered;
 
-    return Container(
-      width: 54,
-      height: 54,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: c.accent.withValues(alpha: 0.45), width: 1.5),
-      ),
-      child: ClipOval(
-        child: Image.asset(
-          'assets/avatar.jpg',
-          fit: BoxFit.cover,
-          // Decode at display size, not the full 512px asset.
-          cacheWidth: 108,
-          semanticLabel: 'Photo of ${Profile.name}',
-          errorBuilder: (context, _, __) => Container(
-            color: c.accentSoft,
-            alignment: Alignment.center,
-            child: Text(
-              Profile.firstName.characters.first,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: c.accent,
-                    fontWeight: FontWeight.w700,
+    return Semantics(
+      button: true,
+      label: 'View a larger photo of ${Profile.name}',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: _open,
+          child: AnimatedContainer(
+            duration: Motion.fast,
+            curve: Motion.standard,
+            width: 54,
+            height: 54,
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: c.accent.withValues(alpha: active ? 0.9 : 0.45),
+                width: 1.5,
+              ),
+              boxShadow: active
+                  ? [
+                      BoxShadow(
+                        color: c.accent.withValues(alpha: 0.35),
+                        blurRadius: 16,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: ClipOval(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    'assets/avatar.jpg',
+                    fit: BoxFit.cover,
+                    // Decode at display size, not the full 512px asset.
+                    cacheWidth: 162,
+                    errorBuilder: (context, _, __) => Container(
+                      color: c.accentSoft,
+                      alignment: Alignment.center,
+                      child: Text(
+                        Profile.firstName.characters.first,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: c.accent,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ),
                   ),
+                  // Hover affordance: without it there is nothing telling a
+                  // visitor the photo is worth clicking.
+                  AnimatedOpacity(
+                    duration: Motion.fast,
+                    opacity: active ? 1 : 0,
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.45),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.zoom_in_rounded,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// The full portrait, shown over a dimmed page.
+class _PortraitDialog extends StatelessWidget {
+  const _PortraitDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final viewport = MediaQuery.sizeOf(context);
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.all(Space.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Semantics(
+            button: true,
+            label: 'Close photo',
+            child: IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close_rounded),
+              color: Colors.white,
+              tooltip: 'Close',
+            ),
+          ),
+          const SizedBox(height: Space.sm),
+          Flexible(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(Radii.lg),
+              child: Image.asset(
+                'assets/profile.jpg',
+                // Bounded by the viewport so a tall portrait cannot push the
+                // caption off screen on a laptop.
+                height: viewport.height * 0.68,
+                fit: BoxFit.contain,
+                semanticLabel: 'Portrait photograph of ${Profile.name}',
+                errorBuilder: (context, _, __) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+          const SizedBox(height: Space.md),
+          Align(
+            child: Text(
+              '${Profile.name} — ${Profile.location}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.white.withValues(alpha: 0.75),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -239,6 +386,7 @@ class _AvailabilityPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    final lens = context.watch<LensController>().lens;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
@@ -256,7 +404,7 @@ class _AvailabilityPill extends StatelessWidget {
           // a second line beats overflowing the pill.
           Flexible(
             child: Text(
-              Profile.availability,
+              Profile.availabilityFor(lens),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: c.textSecondary,
                     fontWeight: FontWeight.w500,
@@ -352,7 +500,7 @@ class _ResumeButtonState extends State<_ResumeButton> {
   @override
   Widget build(BuildContext context) {
     return MagneticButton(
-      label: _busy ? 'Preparing…' : 'Download résumé',
+      label: _busy ? 'Preparing…' : 'Download resume',
       icon: Icons.file_download_outlined,
       filled: false,
       busy: _busy,
@@ -419,7 +567,7 @@ class _StatStrip extends StatelessWidget {
       spacing: Space.md,
       runSpacing: Space.md,
       children: [
-        for (final stat in Profile.stats)
+        for (final stat in Profile.statsFor(context.watch<LensController>().lens))
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: Space.md,

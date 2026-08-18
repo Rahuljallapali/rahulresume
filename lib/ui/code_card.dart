@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
+import '../app/lens.dart';
 import '../app/theme/tokens.dart';
 
 /// Editor-style window for the hero: two tabs, one Spring Boot controller and
@@ -18,7 +20,12 @@ class CodeShowcase extends StatefulWidget {
 }
 
 class _CodeShowcaseState extends State<CodeShowcase> {
-  int _tab = 0;
+  int? _tab;
+
+  /// The tab the visitor last picked, or — until they pick one — whichever
+  /// language matches the lens. A Flutter recruiter should land on the Dart
+  /// file, not have to go looking for it.
+  int _tabFor(Lens lens) => _tab ?? (lens == Lens.mobile ? 1 : 0);
 
   static const _tabs = ['WorkOrderController.java', 'sync_service.dart'];
   static const _captions = [
@@ -42,7 +49,8 @@ class _CodeShowcaseState extends State<CodeShowcase> {
       dim: c.textTertiary,
     );
 
-    final lines = _tab == 0 ? _javaLines(pal) : _dartLines(pal);
+    final tab = _tabFor(context.watch<LensController>().lens);
+    final lines = tab == 0 ? _javaLines(pal) : _dartLines(pal);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -95,7 +103,7 @@ class _CodeShowcaseState extends State<CodeShowcase> {
                         for (var i = 0; i < _tabs.length; i++)
                           _FileTab(
                             label: _tabs[i],
-                            active: _tab == i,
+                            active: tab == i,
                             onTap: () => setState(() => _tab = i),
                           ),
                       ],
@@ -118,7 +126,7 @@ class _CodeShowcaseState extends State<CodeShowcase> {
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
               child: Column(
-                key: ValueKey(_tab),
+                key: ValueKey(tab),
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -133,7 +141,7 @@ class _CodeShowcaseState extends State<CodeShowcase> {
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
             child: Text(
-              _captions[_tab],
+              _captions[tab],
               style: GoogleFonts.jetBrainsMono(
                 fontSize: 11,
                 color: c.textTertiary,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../app/lens.dart';
 import '../app/theme/tokens.dart';
 import '../data/profile.dart';
 import '../ui/glass_card.dart';
@@ -18,6 +20,9 @@ class SkillsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final theme = Theme.of(context);
+    // Leads with the discipline the visitor said they are hiring for.
+    final groups =
+        Profile.skillGroupsFor(context.watch<LensController>().lens);
 
     return ContentShell(
       child: Column(
@@ -35,9 +40,11 @@ class SkillsSection extends StatelessWidget {
           const SizedBox(height: Space.xl),
 
           AutoGrid(
-            columns: context.responsive(compact: 1, medium: 2, wide: 3),
+            columns: context.responsive(compact: 1, medium: 2, wide: 4),
+            spacing: Space.md,
+            equalHeight: true,
             children: [
-              for (var i = 0; i < Profile.skillGroups.length; i++)
+              for (var i = 0; i < groups.length; i++)
                 Reveal(
                   delay: Duration(milliseconds: 40 * i),
                   child: GlassCard(
@@ -53,20 +60,20 @@ class SkillsSection extends StatelessWidget {
                                 color: c.accentSoft,
                                 borderRadius: BorderRadius.circular(Radii.sm),
                               ),
-                              child: Icon(Profile.skillGroups[i].icon,
+                              child: Icon(groups[i].icon,
                                   size: 15, color: c.accent),
                             ),
                             const SizedBox(width: 11),
                             Expanded(
                               child: Text(
-                                Profile.skillGroups[i].title,
+                                groups[i].title,
                                 style: theme.textTheme.titleMedium,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: Space.lg),
-                        for (final s in Profile.skillGroups[i].skills)
+                        for (final s in groups[i].skills)
                           SkillBar(
                             name: s.name,
                             level: s.level,

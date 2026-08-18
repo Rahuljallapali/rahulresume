@@ -62,34 +62,21 @@ class TopNav extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: pageGutter(context),
-                    vertical: 12,
+                    vertical: 10,
                   ),
+                  // Brand and controls take their natural width; the link
+                  // strip gets everything between them and centres itself
+                  // inside it, which reads as balanced instead of bunching
+                  // against the controls on a wide monitor.
                   child: Row(
                     children: [
                       _Brand(onTap: () => onSelect(0)),
-                      // The link strip is the only flexible element, and it
-                      // scrolls rather than overflows. Nav labels come from
-                      // data and font metrics vary by platform, so a fixed
-                      // layout here would eventually clip on someone's
-                      // machine — this cannot.
                       Expanded(
                         child: showLinks
-                            ? SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                // Keeps the strip pinned right when it fits,
-                                // and reveals the tail first when it does not.
-                                reverse: true,
-                                child: Row(
-                                  children: [
-                                    for (var i = 0; i < sections.length; i++)
-                                      _NavLink(
-                                        label: sections[i],
-                                        active: activeIndex == i,
-                                        onTap: () => onSelect(i),
-                                      ),
-                                    const SizedBox(width: Space.sm),
-                                  ],
-                                ),
+                            ? _NavLinkStrip(
+                                sections: sections,
+                                activeIndex: activeIndex,
+                                onSelect: onSelect,
                               )
                             : const SizedBox.shrink(),
                       ),
@@ -101,6 +88,49 @@ class TopNav extends StatelessWidget {
                 ),
               ),
               ScrollProgressBar(progress: progress),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Centres the links when they fit and scrolls them when they do not.
+///
+/// The `minWidth` constraint is what makes both behaviours come from one
+/// layout: the row is forced to at least the available width, so
+/// [MainAxisAlignment.center] has room to centre in; when the labels exceed
+/// that width the row grows past it and the scroll view takes over. Labels
+/// come from data and font metrics vary by platform, so a layout that cannot
+/// scroll would eventually clip on someone's machine.
+class _NavLinkStrip extends StatelessWidget {
+  const _NavLinkStrip({
+    required this.sections,
+    required this.activeIndex,
+    required this.onSelect,
+  });
+
+  final List<String> sections;
+  final int activeIndex;
+  final void Function(int index) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: constraints.maxWidth),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < sections.length; i++)
+                _NavLink(
+                  label: sections[i],
+                  active: activeIndex == i,
+                  onTap: () => onSelect(i),
+                ),
             ],
           ),
         ),
@@ -189,6 +219,9 @@ class _NavLinkState extends State<_NavLink> {
     final c = AppColors.of(context);
     final theme = Theme.of(context);
 
+    // A filled pill rather than a hairline underline: at this size the
+    // underline was too faint to find, and a pill also gives hover somewhere
+    // to land.
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -199,33 +232,34 @@ class _NavLinkState extends State<_NavLink> {
         child: GestureDetector(
           onTap: widget.onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedDefaultTextStyle(
-                  duration: Motion.fast,
-                  style: theme.textTheme.bodySmall!.copyWith(
-                    color: widget.active
-                        ? c.textPrimary
-                        : (_hovered ? c.textSecondary : c.textTertiary),
-                    fontWeight:
-                        widget.active ? FontWeight.w600 : FontWeight.w500,
-                    fontSize: 13,
-                  ),
-                  child: Text(widget.label),
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: AnimatedContainer(
+              duration: Motion.fast,
+              curve: Motion.standard,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+              decoration: BoxDecoration(
+                color: widget.active
+                    ? c.accentSoft
+                    : (_hovered ? c.glassFill : Colors.transparent),
+                borderRadius: BorderRadius.circular(Radii.pill),
+                border: Border.all(
+                  color: widget.active
+                      ? c.accent.withValues(alpha: 0.35)
+                      : Colors.transparent,
                 ),
-                const SizedBox(height: 4),
-                AnimatedContainer(
-                  duration: Motion.fast,
-                  height: 2,
-                  width: widget.active ? 14 : 0,
-                  decoration: BoxDecoration(
-                    color: c.accent,
-                    borderRadius: BorderRadius.circular(Radii.pill),
-                  ),
+              ),
+              child: AnimatedDefaultTextStyle(
+                duration: Motion.fast,
+                style: theme.textTheme.bodySmall!.copyWith(
+                  color: widget.active
+                      ? c.accent
+                      : (_hovered ? c.textPrimary : c.textSecondary),
+                  fontWeight: widget.active ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 13,
                 ),
-              ],
+                child: Text(widget.label),
+              ),
             ),
           ),
         ),

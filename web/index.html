@@ -39,7 +39,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Rahul Jallapalli">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-  <link rel="icon" type="image/png" href="favicon.png">
+  <!-- SVG first for browsers that support it (sharp at any zoom/DPI); the
+       PNG stays as the fallback for those that do not. -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
   <link rel="manifest" href="manifest.json">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -200,7 +203,7 @@
     </ul>
 
     <h2>Experience</h2>
-    <h3>Software Engineer — Swensa (January 2024 – Present, Hyderabad, India)</h3>
+    <h3>Software Engineer — Swensa (September 2022 – Present, Hyderabad, India)</h3>
     <ul>
       <li>Owns three backend systems end to end in the Java 21 and Spring Boot 3.2 multi-tenant service: the in-house Agora token-signing service, Firebase Cloud Messaging delivery with de-duplication, and OTP verification — across 79 commits in a 180-controller, 185-entity codebase.</li>
       <li>Own the Serveiz Flutter client of 554 Dart files and roughly 95,000 lines, shipped through 52 production builds to both app stores; authored 540 of the repository's 727 commits.</li>
