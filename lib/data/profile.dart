@@ -40,7 +40,7 @@ abstract final class Profile {
   static const githubUser = 'rahuljallapalli';
   static const githubUrl = 'https://github.com/rahuljallapalli';
   static const linkedInUrl = 'https://www.linkedin.com/in/rahul-jallapalli';
-  static const siteUrl = 'https://rahuljallapali.github.io/rahulresume';
+  static const siteUrl = 'https://rahuljallapali.github.io';
 
   /// Headline. Concrete enough that a reader knows within one sentence what
   /// kind of engineer this is.
@@ -659,7 +659,7 @@ abstract final class Profile {
       // The personal account, not the work one: this Flutter source lives
       // there. The work account still holds the old JavaScript site under the
       // same repo name, so the near-identical spelling matters.
-      repoUrl: 'https://github.com/Rahuljallapali/rahulresume',
+      repoUrl: 'https://github.com/Rahuljallapali/Rahuljallapali.github.io',
       liveUrl: siteUrl,
     ),
   ];

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rahuljallapali.github.io/rahulresume/sitemap.xml
+Sitemap: https://rahuljallapali.github.io/sitemap.xml
