@@ -40,3 +40,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Compiled web output. Deployed from the gh-pages branch, so tracking it here
+# only bloated the repository and — because main.dart.js dwarfs the source —
+# made GitHub label this Flutter project "JavaScript".
+/build/
