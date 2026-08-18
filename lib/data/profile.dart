@@ -602,7 +602,10 @@ abstract final class Profile {
               'reduced-motion, and AA contrast in both themes.',
         ),
       ],
-      repoUrl: 'https://github.com/rahuljallapalli/rahulresume',
+      // The personal account, not the work one: this Flutter source lives
+      // there. The work account still holds the old JavaScript site under the
+      // same repo name, so the near-identical spelling matters.
+      repoUrl: 'https://github.com/Rahuljallapali/rahulresume',
       liveUrl: siteUrl,
     ),
   ];
