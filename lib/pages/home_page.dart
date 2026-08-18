@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
+import '../app/lens.dart';
 import '../app/router.dart';
 import '../app/theme/tokens.dart';
 import '../data/notes.dart';
@@ -11,6 +13,7 @@ import '../sections/apps_section.dart';
 import '../sections/architecture_section.dart';
 import '../sections/contact_section.dart';
 import '../sections/delivery_section.dart';
+import '../sections/engagement_section.dart';
 import '../sections/experience_section.dart';
 import '../sections/footer_section.dart';
 import '../sections/hero_section.dart';
@@ -36,6 +39,7 @@ class _SectionSpec {
     required this.keywords,
     required this.build,
     this.inNav = true,
+    this.onlyFor,
   });
 
   final String name;
@@ -45,6 +49,13 @@ class _SectionSpec {
   /// The nav strip only has room for the primary path through the page.
   /// Everything else is one keystroke away in the palette.
   final bool inNav;
+
+  /// Restricts this section to a single lens. Used for the freelance
+  /// engagement block, which must never appear on the recruiter-facing
+  /// default.
+  final Lens? onlyFor;
+
+  bool visibleUnder(Lens lens) => onlyFor == null || onlyFor == lens;
 }
 
 /// The whole site.
@@ -117,22 +128,38 @@ class _HomePageState extends State<HomePage> {
       build: () => const NotesSection(),
     ),
     _SectionSpec(
+      name: 'Hire me',
+      keywords: ['freelance', 'contract', 'engagement', 'rates', 'client'],
+      onlyFor: Lens.freelance,
+      build: () => const EngagementSection(),
+    ),
+    _SectionSpec(
       name: 'Contact',
       keywords: ['email', 'reach', 'message'],
       build: () => const ContactSection(),
     ),
   ];
 
-  /// One key per section, used both for scroll-to and for computing which nav
-  /// link is active. Keys are cheaper than maintaining an offset table that
-  /// would go stale on every resize or font-size change.
+  /// One key per declared section, used both for scroll-to and for computing
+  /// which nav link is active. Keys are cheaper than maintaining an offset
+  /// table that would go stale on every resize or font-size change.
+  ///
+  /// Allocated for every section rather than the visible ones, so an index
+  /// means the same thing whichever lens is active — a key belonging to a
+  /// hidden section is simply never attached.
   final _keys = List.generate(_sections.length, (_) => GlobalKey());
 
-  /// Indices of the sections that appear in the header strip.
-  static final _navIndices = [
-    for (var i = 0; i < _sections.length; i++)
-      if (_sections[i].inNav) i,
-  ];
+  /// Indices into [_sections] that this lens shows, in order.
+  List<int> _visibleIndices(Lens lens) => [
+        for (var i = 0; i < _sections.length; i++)
+          if (_sections[i].visibleUnder(lens)) i,
+      ];
+
+  /// Indices of the visible sections that also appear in the header strip.
+  List<int> _navIndicesFor(Lens lens) => [
+        for (final i in _visibleIndices(lens))
+          if (_sections[i].inNav) i,
+      ];
 
   double _progress = 0;
   int _active = 0;
@@ -172,15 +199,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  /// Index into [_navIndices] of the nav link to highlight.
+  /// Position within the current nav strip of the link to highlight.
   int _activeSection() {
     // The section whose top is closest to just under the header wins.
     const anchor = 140.0;
     var best = _active;
     var bestDistance = double.infinity;
 
-    for (var n = 0; n < _navIndices.length; n++) {
-      final ctx = _keys[_navIndices[n]].currentContext;
+    final navIndices = _navIndicesFor(context.read<LensController>().lens);
+    for (var n = 0; n < navIndices.length; n++) {
+      final ctx = _keys[navIndices[n]].currentContext;
       if (ctx == null) continue;
       final box = ctx.findRenderObject() as RenderBox?;
       if (box == null || !box.hasSize || !box.attached) continue;
@@ -214,7 +242,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<PaletteCommand> _commands() => [
-        for (var i = 0; i < _sections.length; i++)
+        // Only sections actually on the page: offering to jump to a hidden
+        // one would scroll nowhere.
+        for (final i in _visibleIndices(context.read<LensController>().lens))
           PaletteCommand(
             label: 'Go to ${_sections[i].name}',
             icon: Icons.arrow_forward_rounded,
@@ -274,6 +304,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final lens = context.watch<LensController>().lens;
+    final visibleIndices = _visibleIndices(lens);
+    final navIndices = _navIndicesFor(lens);
+
     return Shortcuts(
       shortcuts: const {
         SingleActivator(LogicalKeyboardKey.keyK, control: true):
@@ -312,7 +346,7 @@ class _HomePageState extends State<HomePage> {
                               onContact: () => _scrollTo(_indexOf('Contact')),
                             ),
                             const TechTicker(),
-                            for (var i = 0; i < _sections.length; i++)
+                            for (final i in visibleIndices)
                               KeyedSubtree(
                                 key: _keys[i],
                                 child: _sections[i].build(),
@@ -329,13 +363,13 @@ class _HomePageState extends State<HomePage> {
                     right: 0,
                     child: TopNav(
                       sections: [
-                        for (final i in _navIndices) _sections[i].name,
+                        for (final i in navIndices) _sections[i].name,
                       ],
                       activeIndex: _active,
                       progress: _progress,
                       scrolled: _scrolled,
                       onSelect: (n) => _scrollTo(
-                        n == 0 && !_scrolled ? -1 : _navIndices[n],
+                        n == 0 && !_scrolled ? -1 : navIndices[n],
                       ),
                       onOpenPalette: _openPalette,
                     ),

@@ -246,29 +246,38 @@ class _ProjectCardState extends State<_ProjectCard> {
               runSpacing: Space.md,
               children: [
                 for (final m in p.metrics)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            '${m.prefix}${m.value}${m.suffix}',
-                            style: theme.textTheme.headlineSmall
-                                ?.copyWith(color: c.accent),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(m.label, style: theme.textTheme.bodySmall),
-                        ],
-                      ),
-                      Text(
-                        m.detail,
-                        style:
-                            theme.textTheme.bodySmall?.copyWith(fontSize: 11),
-                      ),
-                    ],
+                  // Bounded so a long label wraps instead of running off the
+                  // card: inside a Wrap the Row would otherwise be handed
+                  // unbounded width and never wrap at all.
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 260),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              '${m.prefix}${m.value}${m.suffix}',
+                              style: theme.textTheme.headlineSmall
+                                  ?.copyWith(color: c.accent),
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(m.label,
+                                  style: theme.textTheme.bodySmall),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          m.detail,
+                          style:
+                              theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                        ),
+                      ],
+                    ),
                   ),
               ],
             ),

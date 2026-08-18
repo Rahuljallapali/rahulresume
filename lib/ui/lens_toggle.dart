@@ -25,7 +25,7 @@ class LensToggle extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'HIRING FOR',
+          controller.lens == Lens.freelance ? 'LOOKING FOR' : 'HIRING FOR',
           style: theme.textTheme.labelSmall?.copyWith(color: c.textTertiary),
         ),
         const SizedBox(height: Space.sm),
@@ -43,7 +43,14 @@ class LensToggle extends StatelessWidget {
             spacing: 2,
             runSpacing: 2,
             children: [
-              for (final lens in Lens.values)
+              // The hidden freelance lens is not offered — a recruiter who
+              // spots a "Freelance" tab reads divided attention. It appears
+              // only when a `?role=` link has already selected it, so the
+              // visitor can see which version they are looking at.
+              for (final lens in [
+                ...Lens.offered,
+                if (controller.lens.isHidden) controller.lens,
+              ])
                 _Segment(
                   lens: lens,
                   selected: controller.lens == lens,

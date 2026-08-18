@@ -346,6 +346,28 @@ class NoteBlock {
   final String? language;
 }
 
+/// A shape of work a client can actually buy.
+///
+/// Only rendered under the hidden freelance lens — see `lens.dart`. The
+/// default site is recruiter-facing, where engagement pricing reads as
+/// divided attention.
+@immutable
+class Engagement {
+  const Engagement({
+    required this.title,
+    required this.pitch,
+    required this.deliverables,
+    required this.icon,
+    this.typicalLength,
+  });
+
+  final String title;
+  final String pitch;
+  final List<String> deliverables;
+  final IconData icon;
+  final String? typicalLength;
+}
+
 /// A short technical write-up, deep-linkable at `/#/notes/<slug>`.
 @immutable
 class Note {

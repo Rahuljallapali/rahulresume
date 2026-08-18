@@ -62,6 +62,9 @@ abstract final class Profile {
               'runs a field-service business.',
         Lens.mobile =>
           'I ship Flutter apps that keep working when the network does not.',
+        Lens.freelance =>
+          'One engineer who can build the Spring Boot service and ship the '
+              'Flutter app on top of it.',
       };
 
   static String subheadlineFor(Lens lens) => switch (lens) {
@@ -80,6 +83,13 @@ abstract final class Profile {
               'VoIP push, Google Maps tracking, on-device OCR. I write the '
               'Spring Boot endpoints behind it too, so I am never blocked '
               'waiting on someone else\'s API.',
+        Lens.freelance =>
+          'I have taken a product the whole way: a Java 21 / Spring Boot 3 '
+              'multi-tenant service, and the Flutter apps on top of it that '
+              'are live on the App Store and Google Play through 52 releases. '
+              'Hiring one person for both ends means no integration argument '
+              'between two contractors, and no waiting on an API that never '
+              'quite matches the screen.',
       };
 
   /// The line in the availability pill.
@@ -87,6 +97,7 @@ abstract final class Profile {
         Lens.both => availability,
         Lens.backend => 'Open to senior Java / Spring Boot roles',
         Lens.mobile => 'Open to senior Flutter / mobile roles',
+        Lens.freelance => 'Available for contract work — backend & mobile',
       };
 
   /// Metric strip, ordered so the number that matters to this reader is first.
@@ -95,6 +106,8 @@ abstract final class Profile {
         // stats = [backend systems, apps shipped, crash-free, commit share]
         Lens.backend => [stats[0], stats[1], stats[3], stats[2]],
         Lens.mobile => [stats[1], stats[2], stats[3], stats[0]],
+        // A client cares first that things actually shipped and stayed up.
+        Lens.freelance => [stats[1], stats[2], stats[0], stats[3]],
       };
 
   /// Work, ordered so the flagship for this lens leads.
@@ -391,22 +404,42 @@ abstract final class Profile {
           body: 'Stateless JWT filter, Spring Security configuration, OAuth2 '
               'resource server and Authy-based two-factor authentication.',
         ),
+        // The three below are the systems Rahul owns end to end, written at
+        // the depth an interviewer will actually probe. Titled "Mine:" so a
+        // reader can tell them apart from the surrounding service at a
+        // glance — the distinction the whole positioning rests on.
         ProjectHighlight(
-          title: 'In-house real-time token signing',
-          body: 'Agora RTC and RTM access tokens built and signed inside the '
-              'service — no third-party token broker in the trust path.',
+          title: 'Mine: in-house real-time token signing',
+          body: 'Agora RTC and RTM access tokens are built and signed inside '
+              'the service rather than fetched from a broker. A token names a '
+              'channel, a user, a role and an expiry — that is an '
+              'authorisation decision about our domain, so it is made where '
+              'the domain lives, after checking the caller is party to the '
+              'work order the channel belongs to. The app certificate exists '
+              'in one place, and expiry is a business rule changed in code '
+              'review rather than a config value in a third-party service.',
+        ),
+        ProjectHighlight(
+          title: 'Mine: de-duplicated push delivery',
+          body: 'Firebase Admin FCM behind a dedicated de-duplication table, '
+              'because retries and multi-device registration otherwise mean a '
+              'technician gets the same job alert three times. A separate '
+              'APNs VoIP path carries incoming calls, which iOS will only '
+              'deliver to a locked device through that channel.',
+        ),
+        ProjectHighlight(
+          title: 'Mine: OTP verification',
+          body: 'The pre-authentication path: a request arrives with no token, '
+              'so the tenant has to come from the request rather than from '
+              'the security context — the inverse of the rule the rest of the '
+              'service depends on. Codes are single-use and short-lived, and '
+              'delivery goes through the customer\'s own SMS gateway.',
         ),
         ProjectHighlight(
           title: 'Document and media pipeline',
           body:
               'AWS S3 storage with Textract OCR, plus Apache POI spreadsheets, '
               'iText PDFs and zip4j archives for customer exports.',
-        ),
-        ProjectHighlight(
-          title: 'Reliable push delivery',
-          body: 'Firebase Admin FCM with a dedicated de-duplication table, and '
-              'a separate APNs VoIP path so incoming calls reach locked iOS '
-              'devices.',
         ),
         ProjectHighlight(
           title: 'Scheduled work',
@@ -416,13 +449,20 @@ abstract final class Profile {
       ],
       metrics: [
         Stat(
+          value: 3,
+          label: 'systems I own',
+          detail: 'token signing · push delivery · OTP',
+        ),
+        Stat(
             value: 180,
             label: 'REST controllers',
-            detail: 'across the service'),
+            detail: 'the service they live in'),
         Stat(value: 185, label: 'JPA entities', detail: 'tenant-scoped domain'),
         Stat(value: 21, label: 'Java version', detail: 'Spring Boot 3.2.5'),
       ],
-      privateNote: 'Private repository — architecture discussion welcome.',
+      privateNote: 'Private repository — architecture discussion welcome. '
+          'The service is built by a team; the three systems marked "Mine" '
+          'above are the ones I own, across 79 commits.',
     ),
     Project(
       slug: 'field-service-platform',
@@ -1131,6 +1171,86 @@ abstract final class Profile {
 }''',
     ),
   ];
+
+  // ---------------------------------------------------------------------------
+  // Freelance. Rendered only under the hidden freelance lens, so the default
+  // recruiter-facing site never shows rates or engagement shapes.
+  // ---------------------------------------------------------------------------
+
+  static const engagements = <Engagement>[
+    Engagement(
+      title: 'Spring Boot backend build-out',
+      icon: Icons.dns_rounded,
+      typicalLength: '4–12 weeks',
+      pitch: 'A secured, documented Java service your team can keep building '
+          'on — schema, endpoints, auth and deployment, not a prototype.',
+      deliverables: [
+        'Relational schema and JPA persistence for your domain',
+        'REST API with JWT auth, documented in OpenAPI',
+        'Multi-tenant isolation enforced at the query layer',
+        'Dockerised build and a deploy that runs on your cloud',
+      ],
+    ),
+    Engagement(
+      title: 'Flutter app to store release',
+      icon: Icons.phone_iphone_rounded,
+      typicalLength: '6–16 weeks',
+      pitch: 'One codebase, both stores, a live listing at the end. I have '
+          'taken that exact path 52 times on a production app.',
+      deliverables: [
+        'Cross-platform app from empty repo to signed release',
+        'Offline-first data layer where the network cannot be trusted',
+        'App Store and Play Store submission, including review responses',
+        'Crash and analytics instrumentation from day one',
+      ],
+    ),
+    Engagement(
+      title: 'Rescue, audit or hand-over',
+      icon: Icons.build_circle_outlined,
+      typicalLength: '1–3 weeks',
+      pitch: 'A codebase that stalled, or one you inherited. A written '
+          'assessment of what is there, what is risky, and what to do about '
+          'it in what order.',
+      deliverables: [
+        'Architecture and security review of the current code',
+        'Prioritised risk list with concrete remediation steps',
+        'Fixes for the blocking issues, not just a report',
+        'Hand-over notes your own developers can act on',
+      ],
+    ),
+  ];
+
+  /// How the working relationship runs. Every line has to survive contact
+  /// with a real client, so none of it is aspirational.
+  static const workingAgreement = <String>[
+    'You get one engineer across the whole path — schema, API, app, release '
+        '— rather than a hand-off between three people.',
+    'Written updates at an agreed cadence, in plain language, whether the '
+        'news is good or not.',
+    'Working software over status decks. You see it running early and often.',
+    'Based in Hyderabad (IST). Overlap with Europe for most of the day and '
+        'with US mornings; I schedule around your timezone, not mine.',
+    'Code, credentials and documentation are yours from the first commit.',
+  ];
+
+  /// Scheduling link (Cal.com, Calendly, …). Empty until one exists — the
+  /// booking card falls back to a pre-filled email, which always works.
+  static const bookingUrl = '';
+
+  /// Pre-filled enquiry. Lowering the cost of the first message is the single
+  /// highest-leverage thing on a page meant to start conversations.
+  static String get introMailto {
+    final subject = Uri.encodeComponent('Project enquiry');
+    final body = Uri.encodeComponent(
+      'Hi Rahul,\n\n'
+      'What we are building:\n\n'
+      'Where we are now:\n\n'
+      'What we need help with (backend / mobile / both):\n\n'
+      'Rough timeline:\n\n'
+      'Thanks,\n',
+    );
+    return 'mailto:$email?subject=$subject&body=$body';
+  }
 
   // ---------------------------------------------------------------------------
   // Live activity

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:rahul_resume/app/lens.dart';
 import 'package:rahul_resume/app/router.dart';
 import 'package:rahul_resume/app/theme/app_theme.dart';
@@ -11,6 +12,8 @@ import 'package:rahul_resume/data/models.dart';
 import 'package:rahul_resume/data/notes.dart';
 import 'package:rahul_resume/data/profile.dart';
 import 'package:rahul_resume/main.dart';
+import 'package:rahul_resume/pages/home_page.dart';
+import 'package:rahul_resume/sections/engagement_section.dart';
 import 'package:rahul_resume/ui/reveal.dart';
 import 'package:rahul_resume/ui/tech_ticker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,6 +59,44 @@ void main() {
     expect(find.text('View my work'), findsOneWidget);
     expect(find.text('Download resume'), findsOneWidget);
     expect(find.text(Profile.name), findsWidgets);
+  });
+
+  // The load-bearing guarantee of the whole lens design: a recruiter opening
+  // the plain URL must never see engagement pricing. Asserted through the
+  // real widget tree rather than the data layer, because the data is always
+  // present — it is the rendering that is gated.
+  group('freelance content is gated', () {
+    Future<void> pumpWide(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1600, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(const PortfolioApp());
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    testWidgets('the default page shows no engagement section',
+        (tester) async {
+      await pumpWide(tester);
+
+      expect(find.byType(EngagementSection), findsNothing);
+      expect(find.text('What you can hire me for'), findsNothing);
+      // And the switcher must not advertise a way to reach it.
+      expect(find.text('Freelance'), findsNothing);
+    });
+
+    testWidgets('the freelance lens reveals it', (tester) async {
+      await pumpWide(tester);
+
+      // Simulates arriving via ?role=freelance, which is the only route in.
+      Provider.of<LensController>(
+        tester.element(find.byType(HomePage)),
+        listen: false,
+      ).select(Lens.freelance);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.byType(EngagementSection), findsOneWidget);
+    });
   });
 
   // The app cards share a height via IntrinsicHeight. Wrap reports its
@@ -423,6 +464,19 @@ void main() {
       }
     });
 
+    test('engagement content exists only for the freelance lens', () {
+      // The data may exist; what matters is that nothing renders it outside
+      // the freelance lens. That is enforced in home_page via
+      // _SectionSpec.onlyFor, and asserted at the widget level below.
+      expect(Profile.engagements, isNotEmpty);
+      for (final e in Profile.engagements) {
+        expect(e.deliverables.length, greaterThanOrEqualTo(3),
+            reason: '"${e.title}" is vague about what a client receives');
+        expect(e.pitch.length, greaterThan(40));
+      }
+      expect(Profile.workingAgreement, isNotEmpty);
+    });
+
     test('each lens leads with its own specialism', () {
       expect(Profile.projectsFor(Lens.backend).first.slug, 'service-backend');
       expect(Profile.projectsFor(Lens.mobile).first.slug,
@@ -449,8 +503,22 @@ void main() {
       expect(Lens.fromSlug('flutter'), Lens.mobile);
       expect(Lens.fromSlug('springboot'), Lens.backend);
       expect(Lens.fromSlug('java'), Lens.backend);
+      expect(Lens.fromSlug('freelance'), Lens.freelance);
+      expect(Lens.fromSlug('client'), Lens.freelance);
       expect(Lens.fromSlug('nonsense'), Lens.both);
       expect(Lens.fromSlug(null), Lens.both);
+    });
+
+    // The freelance lens exists to be handed to a client, never stumbled
+    // into by a recruiter — engagement pricing on a CV reads as divided
+    // attention, which is the impression the site is built to avoid.
+    test('freelance is reachable only by link', () {
+      expect(Lens.offered, isNot(contains(Lens.freelance)),
+          reason: 'the switcher must not offer the freelance lens');
+      expect(Lens.freelance.isHidden, isTrue);
+      for (final lens in Lens.offered) {
+        expect(lens.isHidden, isFalse);
+      }
     });
 
     test('architecture nodes are explained', () {

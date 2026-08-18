@@ -14,7 +14,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum Lens {
   both('both', 'Full stack', 'Both'),
   backend('backend', 'Spring Boot', 'Spring'),
-  mobile('mobile', 'Flutter', 'Flutter');
+  mobile('mobile', 'Flutter', 'Flutter'),
+
+  /// Reachable only by `?role=freelance`, never offered in the toggle.
+  ///
+  /// A hiring manager who spots a "Freelance" tab reads divided attention,
+  /// which is the exact impression this site is built to avoid — so the link
+  /// is something to hand to a client, not something a recruiter can wander
+  /// into. It is also never remembered between visits: see
+  /// [LensController._set].
+  freelance('freelance', 'Freelance', 'Freelance');
 
   const Lens(this.slug, this.label, this.shortLabel);
 
@@ -23,6 +32,11 @@ enum Lens {
 
   /// Used where three full labels will not fit on one line — a phone.
   final String shortLabel;
+
+  /// The lenses the on-page switcher offers.
+  static const offered = [Lens.both, Lens.backend, Lens.mobile];
+
+  bool get isHidden => !offered.contains(this);
 
   static Lens fromSlug(String? slug) {
     if (slug == null) return Lens.both;
@@ -34,6 +48,7 @@ enum Lens {
     return switch (normalised) {
       'java' || 'spring' || 'springboot' || 'spring-boot' => Lens.backend,
       'flutter' || 'dart' || 'app' || 'android' || 'ios' => Lens.mobile,
+      'client' || 'hire' || 'contract' || 'consulting' => Lens.freelance,
       _ => Lens.both,
     };
   }
@@ -84,7 +99,12 @@ class LensController extends ChangeNotifier {
     if (_lens == lens) return;
     _lens = lens;
     notifyListeners();
-    if (!persist) return;
+
+    // Hidden lenses are never remembered. Otherwise opening the freelance
+    // link once would leave this browser showing freelance content on every
+    // later visit — including the visit where the owner checks what a
+    // recruiter is about to see.
+    if (!persist || lens.isHidden) return;
     SharedPreferences.getInstance()
         .then((prefs) => prefs.setString(_prefsKey, lens.slug))
         .catchError((_) => false);
