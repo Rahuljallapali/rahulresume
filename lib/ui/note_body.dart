@@ -142,26 +142,38 @@ class _Block extends StatelessWidget {
         );
 
       case NoteBlockKind.callout:
+        // The accent edge is a sibling strip, not a thick left BorderSide:
+        // Flutter forbids borderRadius on a border whose sides differ in
+        // colour, and that combination threw on every note page.
         return Padding(
           padding: const EdgeInsets.only(top: Space.sm, bottom: Space.lg),
-          child: Container(
-            padding: const EdgeInsets.all(Space.lg),
-            decoration: BoxDecoration(
-              color: c.accentSoft,
-              borderRadius: BorderRadius.circular(Radii.md),
-              border: Border(
-                left: BorderSide(color: c.accent, width: 3),
-                top: BorderSide(color: c.accent.withValues(alpha: 0.18)),
-                right: BorderSide(color: c.accent.withValues(alpha: 0.18)),
-                bottom: BorderSide(color: c.accent.withValues(alpha: 0.18)),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(Radii.md),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: c.accentSoft,
+                border: Border.all(color: c.accent.withValues(alpha: 0.18)),
               ),
-            ),
-            child: Text(
-              block.text,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: c.textPrimary,
-                height: 1.7,
-                fontWeight: FontWeight.w500,
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(width: 3, color: c.accent),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(Space.lg),
+                        child: Text(
+                          block.text,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: c.textPrimary,
+                            height: 1.7,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

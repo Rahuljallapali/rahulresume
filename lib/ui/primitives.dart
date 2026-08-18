@@ -433,20 +433,29 @@ class SectionHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: 18,
               height: 2,
+              // Aligns the rule with the cap height of the first line rather
+              // than the top of the line box.
+              margin: const EdgeInsets.only(top: 7),
               decoration: BoxDecoration(
                 color: c.accent,
                 borderRadius: BorderRadius.circular(Radii.pill),
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              eyebrow.toUpperCase(),
-              style: theme.textTheme.labelMedium?.copyWith(color: c.accent),
+            // Flexible, not bare: eyebrows are uppercase mono with wide
+            // tracking, and the longer ones exceed a 360px phone. Without
+            // this the Text gets unbounded width and overflows instead of
+            // wrapping to a second line.
+            Flexible(
+              child: Text(
+                eyebrow.toUpperCase(),
+                style: theme.textTheme.labelMedium?.copyWith(color: c.accent),
+              ),
             ),
           ],
         ),

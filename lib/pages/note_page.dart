@@ -31,10 +31,14 @@ class NotePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              // Wrap, not Row: the date and reading time are mono uppercase
+              // with wide tracking and do not fit one line on a 320px phone.
+              Wrap(
+                spacing: Space.sm,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(note.date, style: theme.textTheme.labelMedium),
-                  const SizedBox(width: Space.sm),
                   Container(
                     width: 3,
                     height: 3,
@@ -43,7 +47,6 @@ class NotePage extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  const SizedBox(width: Space.sm),
                   Text(
                     '${note.readingMinutes} MIN READ',
                     style: theme.textTheme.labelMedium,
