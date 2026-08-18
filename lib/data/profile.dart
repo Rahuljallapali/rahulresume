@@ -527,7 +527,14 @@ abstract final class Profile {
           'their own service data in plain English instead of waiting on a '
           'custom report.',
       tags: ['AI', 'Backend'],
-      stack: ['Spring Boot', 'REST', 'Python (Flask)', 'Tenant scoping'],
+      stack: [
+        'Spring Boot',
+        'REST',
+        'Python (Flask)',
+        'Service-to-service HTTP',
+        'Correlation ids',
+        'Tenant scoping',
+      ],
       architecture:
           'The Spring service exposes a POST endpoint that composes the '
           'question with the resolved tenant identifier and pagination bounds, '
@@ -556,6 +563,13 @@ abstract final class Profile {
           body:
               'The Python service is addressed through injected configuration, '
               'so it can move or scale without touching the Java service.',
+        ),
+        ProjectHighlight(
+          title: 'Failure stays contained',
+          body: 'The Java service owns the contract with its callers, so an '
+              'inference tier that is slow, down or wrong returns a handled '
+              'error rather than propagating a 500 — the boundary absorbs the '
+              'failure instead of forwarding it.',
         ),
       ],
       privateNote: 'Private repository.',
@@ -752,6 +766,14 @@ abstract final class Profile {
             evidence: 'documented with OpenAPI'),
         Skill(name: 'Quartz scheduling', level: 0.6),
         Skill(name: 'MapStruct', level: 0.6),
+        // Deliberately in the lowest band: this is a side project, not
+        // production, and the evidence says so. An inflated microservices
+        // claim is the one a Java interviewer probes hardest.
+        Skill(
+          name: 'Spring Cloud / microservices',
+          level: 0.4,
+          evidence: 'Eureka, Config Server, Gateway — side project',
+        ),
       ],
     ),
     SkillGroup(
@@ -804,6 +826,11 @@ abstract final class Profile {
             name: 'AWS EC2',
             level: 0.6,
             evidence: 'container deployment target'),
+        Skill(
+          name: 'Docker Compose',
+          level: 0.6,
+          evidence: 'multi-service local orchestration',
+        ),
         Skill(
             name: 'Firebase Crashlytics', level: 0.8, evidence: 'crash triage'),
         Skill(
