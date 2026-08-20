@@ -1,0 +1,4 @@
+# GitHub Pages reads this file byte for byte; a CRLF checkout on Windows
+# appends a stray carriage return to the hostname and the custom domain
+# stops matching.
+CNAME text eol=lf
