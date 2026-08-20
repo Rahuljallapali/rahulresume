@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rahuljallapali.github.io/sitemap.xml
+Sitemap: https://rahuljallapalli.is-a.dev/sitemap.xml
