@@ -359,6 +359,7 @@ class Engagement {
     required this.deliverables,
     required this.icon,
     this.typicalLength,
+    this.investment,
   });
 
   final String title;
@@ -366,6 +367,14 @@ class Engagement {
   final List<String> deliverables;
   final IconData icon;
   final String? typicalLength;
+
+  /// What it costs, as a range the client can budget against.
+  ///
+  /// Null until a real number exists — the card simply omits the line, the
+  /// same way [Profile.bookingUrl] falls back rather than rendering an empty
+  /// control. A guessed price is worse than no price: it gets quoted back at
+  /// you in the negotiation.
+  final String? investment;
 }
 
 /// A short technical write-up, deep-linkable at `/#/notes/<slug>`.

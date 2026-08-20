@@ -1220,6 +1220,51 @@ abstract final class Profile {
     ),
   ];
 
+  /// The small, fixed-scope way in — deliberately the first thing a client
+  /// sees.
+  ///
+  /// A stranger will not hand a five-figure build to someone they have never
+  /// worked with, but they will buy a week. It converts the decision from
+  /// "do I trust him with the project" to "is this worth one week's budget",
+  /// which is a question a cautious client can actually answer. It also ends
+  /// with a document that is useful even if they hire nobody, so the money is
+  /// never wasted.
+  static const discovery = Engagement(
+    title: 'Start here: a paid discovery week',
+    icon: Icons.explore_outlined,
+    typicalLength: '1 week, fixed scope',
+    pitch: 'Before anyone commits to a build, we spend a week establishing '
+        'what it actually takes. You finish with a plan you own outright — '
+        'and no obligation to hire me to execute it.',
+    deliverables: [
+      'A written technical plan: architecture, data model, and the '
+          'integrations your idea actually depends on',
+      'A staged build estimate, so you can see what the first usable '
+          'version costs before committing to the whole thing',
+      'The risks that decide the budget — the store review, the offline '
+          'edge cases, the third-party API that will not behave',
+      'A working proof of the one piece most likely to sink the project',
+    ],
+  );
+
+  /// Work I turn down, published on purpose.
+  ///
+  /// Naming the edges of the offer is a trust signal a claim cannot buy: a
+  /// page that says yes to everything reads as someone with nothing booked.
+  /// It also stops the mismatched enquiry before it costs either of us an
+  /// evening.
+  static const notTakingOn = <String>[
+    'Visual design from scratch — I build against designs your team '
+        'supplies, or a clean system-standard interface, and I will tell you '
+        'up front which one your project needs.',
+    'Fixed-price quotes on undefined scope. That is what the discovery week '
+        'is for; quoting blind serves neither of us.',
+    '24/7 on-call. I hand over runnable code and documentation your own team '
+        'can operate.',
+    'Rescuing a project by the weekend. If the deadline is already gone, an '
+        'honest no is worth more to you than an optimistic yes.',
+  ];
+
   /// How the working relationship runs. Every line has to survive contact
   /// with a real client, so none of it is aspirational.
   static const workingAgreement = <String>[

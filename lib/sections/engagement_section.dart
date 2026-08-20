@@ -27,9 +27,20 @@ class EngagementSection extends StatelessWidget {
             child: SectionHeader(
               eyebrow: 'Working together',
               title: 'What you can hire me for',
-              lead: 'Three shapes of work I take on. If your project is none '
-                  'of them but sounds close, say so — the worst outcome is a '
+              lead: 'Start small if you want to — the discovery week below is '
+                  'designed for exactly that. If your project is none of '
+                  'these but sounds close, say so; the worst outcome is a '
                   'straight answer.',
+            ),
+          ),
+          const SizedBox(height: Space.lg),
+          const Reveal(child: _ProofStrip()),
+          const SizedBox(height: Space.lg),
+          const Reveal(
+            delay: Duration(milliseconds: 60),
+            child: _EngagementCard(
+              engagement: Profile.discovery,
+              featured: true,
             ),
           ),
           const SizedBox(height: Space.xl),
@@ -65,6 +76,8 @@ class EngagementSection extends StatelessWidget {
                     ],
                   ),
           ),
+          const SizedBox(height: Space.xxl),
+          const Reveal(child: _NotTakingOn()),
         ],
       ),
     );
@@ -72,8 +85,12 @@ class EngagementSection extends StatelessWidget {
 }
 
 class _EngagementCard extends StatelessWidget {
-  const _EngagementCard({required this.engagement});
+  const _EngagementCard({required this.engagement, this.featured = false});
   final Engagement engagement;
+
+  /// The discovery card, rendered full width above the grid so the cheapest
+  /// way in is also the most visible one.
+  final bool featured;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +100,7 @@ class _EngagementCard extends StatelessWidget {
 
     return GlassCard(
       semanticLabel: '${e.title}. ${e.pitch}',
+      accentBorder: featured,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -106,6 +124,25 @@ class _EngagementCard extends StatelessWidget {
           ],
           const SizedBox(height: Space.md),
           Text(e.pitch, style: theme.textTheme.bodyMedium),
+          if (e.investment != null) ...[
+            const SizedBox(height: Space.md),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.payments_outlined, size: 15, color: c.accent),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    e.investment!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: c.accent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: Space.md),
           Divider(color: c.hairline),
           const SizedBox(height: Space.sm),
@@ -254,6 +291,131 @@ class _Fact extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+/// The one claim on this page a client can check for themselves in thirty
+/// seconds.
+///
+/// Every freelancer's site asserts competence; almost none of them can be
+/// installed. Putting the store links above the offer means the reader has
+/// already verified the work before they reach the part where they are asked
+/// for money.
+class _ProofStrip extends StatelessWidget {
+  const _ProofStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final theme = Theme.of(context);
+    final app = Profile.storeApps.firstWhere((a) => a.name == 'Serveiz');
+
+    final blurb = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Before you read any further, go and use it',
+            style: theme.textTheme.titleLarge),
+        const SizedBox(height: Space.sm),
+        Text(
+          '${app.name} is live on both stores and in daily use by service '
+          'crews. I wrote the app and the service behind it — ${app.role}. '
+          'Judge the work, not the sales copy.',
+          style: theme.textTheme.bodyMedium,
+        ),
+      ],
+    );
+
+    final buttons = [
+      if (app.appStoreUrl != null)
+        MagneticButton(
+          label: 'App Store',
+          icon: Icons.apple_rounded,
+          filled: false,
+          expand: context.isCompact,
+          onPressed: () => openLink(app.appStoreUrl!),
+        ),
+      if (app.playStoreUrl != null)
+        MagneticButton(
+          label: 'Google Play',
+          icon: Icons.shop_rounded,
+          filled: false,
+          expand: context.isCompact,
+          onPressed: () => openLink(app.playStoreUrl!),
+        ),
+    ];
+
+    return GlassCard(
+      interactive: false,
+      semanticLabel: 'See a live app I built: ${app.name}',
+      child: context.isCompact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                blurb,
+                const SizedBox(height: Space.lg),
+                for (final b in buttons) ...[
+                  b,
+                  const SizedBox(height: Space.sm),
+                ],
+              ],
+            )
+          : Row(
+              children: [
+                Icon(Icons.verified_outlined, size: 20, color: c.success),
+                const SizedBox(width: Space.md),
+                Expanded(child: blurb),
+                const SizedBox(width: Space.lg),
+                for (final b in buttons) ...[
+                  const SizedBox(width: Space.sm),
+                  b,
+                ],
+              ],
+            ),
+    );
+  }
+}
+
+/// The boundaries of the offer.
+///
+/// Counter-intuitive but reliable: a client trusts a scope with edges more
+/// than one without. It also deflects the enquiries that were never going to
+/// close, which matters more than it sounds when evenings are the budget.
+class _NotTakingOn extends StatelessWidget {
+  const _NotTakingOn();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('What I will turn down', style: theme.textTheme.headlineSmall),
+        const SizedBox(height: Space.sm),
+        Text(
+          'So you can rule me out quickly if this is not a fit.',
+          style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: Space.lg),
+        for (final line in Profile.notTakingOn)
+          Padding(
+            padding: const EdgeInsets.only(bottom: Space.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 3, right: 12),
+                  child: Icon(Icons.remove_rounded,
+                      size: 15, color: c.textTertiary),
+                ),
+                Expanded(child: Text(line, style: theme.textTheme.bodyMedium)),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

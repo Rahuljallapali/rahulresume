@@ -477,6 +477,46 @@ void main() {
       expect(Profile.workingAgreement, isNotEmpty);
     });
 
+    // The cheapest way in has to stay the most concrete thing on the page:
+    // a client buys a week because they can see exactly what lands at the
+    // end of it.
+    test('the discovery week states what it produces', () {
+      expect(Profile.discovery.deliverables.length, greaterThanOrEqualTo(3));
+      expect(Profile.discovery.typicalLength, isNotNull);
+      expect(Profile.discovery.pitch.length, greaterThan(40));
+      expect(Profile.discovery, isNot(isIn(Profile.engagements)),
+          reason: 'discovery renders separately, above the grid');
+    });
+
+    test('the boundaries of the offer are published', () {
+      expect(Profile.notTakingOn.length, greaterThanOrEqualTo(3));
+      for (final line in Profile.notTakingOn) {
+        expect(line.length, greaterThan(30),
+            reason: '"$line" is too vague to rule anything out');
+      }
+    });
+
+    // The proof strip links the one app a client can install. If the URLs
+    // ever go null the section quietly renders no buttons at all, so this
+    // guards the whole point of it.
+    test('the freelance proof strip has something to link to', () {
+      final serveiz =
+          Profile.storeApps.firstWhere((a) => a.name == 'Serveiz');
+      expect(serveiz.appStoreUrl, isNotNull);
+      expect(serveiz.playStoreUrl, isNotNull);
+    });
+
+    // A price is optional, but a guessed one is not acceptable: every
+    // investment line that exists must name a currency.
+    test('any stated price names a currency', () {
+      for (final e in [...Profile.engagements, Profile.discovery]) {
+        final price = e.investment;
+        if (price == null) continue;
+        expect(price, matches(r'[₹$£€]'),
+            reason: '"${e.title}" states a price with no currency');
+      }
+    });
+
     test('each lens leads with its own specialism', () {
       expect(Profile.projectsFor(Lens.backend).first.slug, 'service-backend');
       expect(Profile.projectsFor(Lens.mobile).first.slug,

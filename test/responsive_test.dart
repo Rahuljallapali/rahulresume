@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:rahul_resume/app/lens.dart';
 import 'package:rahul_resume/app/router.dart';
 import 'package:rahul_resume/data/notes.dart';
 import 'package:rahul_resume/data/profile.dart';
 import 'package:rahul_resume/main.dart';
+import 'package:rahul_resume/pages/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Layout regression net for small screens.
@@ -55,6 +58,33 @@ void main() {
         testWidgets('at ${width.toInt()}px, text scale $scale',
             (tester) async {
           await pumpAt(tester, width, textScale: scale);
+          expect(tester.takeException(), isNull);
+        });
+      }
+    }
+  });
+
+  // The freelance lens is the only way the engagement section ever renders,
+  // so the sweep above — which runs under the default lens — never touches
+  // it. Without this group the client-facing page is the one page on the
+  // site with no overflow net, which is precisely backwards: it is the page
+  // a paying stranger reads.
+  group('the freelance lens fits', () {
+    for (final width in <double>[320, 360, 390, 768, 1024]) {
+      for (final scale in <double>[1.0, 1.3]) {
+        testWidgets('at ${width.toInt()}px, text scale $scale',
+            (tester) async {
+          await pumpAt(tester, width, textScale: scale);
+
+          // Simulates arriving via ?role=freelance, the only route in.
+          Provider.of<LensController>(
+            tester.element(find.byType(HomePage)),
+            listen: false,
+          ).select(Lens.freelance);
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 100));
+
+          expect(find.byType(HomePage), findsOneWidget);
           expect(tester.takeException(), isNull);
         });
       }
